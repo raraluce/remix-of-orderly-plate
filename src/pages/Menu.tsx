@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Star, Clock } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Clock, Sparkles, User } from "lucide-react";
 import MenuCard from "@/components/menu/MenuCard";
 import CategoryNav from "@/components/menu/CategoryNav";
 import FloatingCart from "@/components/menu/FloatingCart";
