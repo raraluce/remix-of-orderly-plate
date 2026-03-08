@@ -81,6 +81,8 @@ const SmartMenu = () => {
 
   const handleAddToOrder = (item: { id: string; name: string; price: number; image: string }) => {
     addItem(item);
+    setAddedItemId(item.id);
+    setTimeout(() => setAddedItemId(null), 1200);
   };
 
   return (
