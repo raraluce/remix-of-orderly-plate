@@ -207,7 +207,7 @@ export const menuItems: MenuItem[] = [
     id: "27", name: "Crispy Calamari",
     description: "Lightly battered squid, lemon aioli, rocket salad",
     price: 14.00, image: foodSushi, category: "starters", tags: ["Popular"],
-    allergens: ["gluten", "seafood", "eggs"], dietaryTags: [], shareable: true,
+    allergens: ["gluten", "molluscs", "eggs"], dietaryTags: [], shareable: true,
     type: "starter", preference: ["fish"],
   },
   {
