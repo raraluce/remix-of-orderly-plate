@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Utensils, Salad, Fish, Drumstick, Leaf, Sparkles, Zap, Users, ChevronRight, Plus, Eye, Brain, ArrowLeft } from "lucide-react";
+import { Utensils, Salad, Fish, Drumstick, Leaf, Sparkles, Zap, Users, ChevronRight, Plus, Eye, Brain, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { generateRecommendations, type UserPreferences, type TableRecommendation } from "@/lib/recommendationEngine";
 import { type Allergen, type FoodPreference, type HungerLevel, dietaryTagLabels } from "@/data/menuData";
+import FloatingCart from "@/components/menu/FloatingCart";
+import CartSheet from "@/components/menu/CartSheet";
 
 const STEPS = ["welcome", "dietary", "preference", "hunger", "table", "loading", "results"] as const;
 type Step = typeof STEPS[number];
