@@ -1,6 +1,7 @@
 import { X, Minus, Plus, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import PairingSuggestions from "@/components/menu/PairingSuggestions";
 
 interface Props {
   open: boolean;
