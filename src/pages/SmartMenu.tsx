@@ -513,10 +513,14 @@ const SmartMenu = () => {
                           </Button>
                           <Button
                             size="sm"
-                            className="flex-1 gradient-accent text-primary-foreground rounded-xl text-xs h-9"
+                            className={`flex-1 rounded-xl text-xs h-9 ${addedItemId === item.id ? "bg-emerald-600 text-primary-foreground" : "gradient-accent text-primary-foreground"}`}
                             onClick={() => handleAddToOrder({ id: item.id, name: item.name, price: item.price, image: item.image })}
                           >
-                            <Plus className="w-3.5 h-3.5 mr-1" /> Add to order
+                            {addedItemId === item.id ? (
+                              <><Check className="w-3.5 h-3.5 mr-1" /> Added!</>
+                            ) : (
+                              <><Plus className="w-3.5 h-3.5 mr-1" /> Add to order</>
+                            )}
                           </Button>
                         </div>
                       </motion.div>
