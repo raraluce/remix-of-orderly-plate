@@ -54,6 +54,11 @@ const CartSheet = ({ open, onClose, onCheckout }: Props) => {
               </div>
             ))
           )}
+
+          {/* Smart pairing suggestions */}
+          {items.length > 0 && (
+            <PairingSuggestions lastAddedDishId={items[items.length - 1]?.id ?? null} />
+          )}
         </div>
 
         {items.length > 0 && (
