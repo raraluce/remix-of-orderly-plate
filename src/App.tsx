@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
+import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import Dashboard from "./pages/Dashboard";
@@ -19,23 +20,25 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/smart-menu" element={<SmartMenu />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/menu-management" element={<MenuManagement />} />
-            <Route path="/profile" element={<DinerProfile />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
+      <UserPreferencesProvider>
+        <CartProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/smart-menu" element={<SmartMenu />} />
+              <Route path="/payment" element={<Payment />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/menu-management" element={<MenuManagement />} />
+              <Route path="/profile" element={<DinerProfile />} />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </UserPreferencesProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
