@@ -1,7 +1,9 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import type { MenuItem } from "@/data/menuData";
+import { allergenLabels, dietaryTagLabels } from "@/data/menuData";
 
 const MenuCard = ({ item }: { item: MenuItem }) => {
   const { addItem } = useCart();
@@ -21,11 +23,29 @@ const MenuCard = ({ item }: { item: MenuItem }) => {
         )}
       </div>
       <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start justify-between gap-2 mb-1">
           <h3 className="font-display font-semibold text-base">{item.name}</h3>
           <span className="font-display font-bold text-primary shrink-0">${item.price.toFixed(2)}</span>
         </div>
-        <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{item.description}</p>
+        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{item.description}</p>
+        {item.dietaryTags && item.dietaryTags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {item.dietaryTags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20">
+                {dietaryTagLabels[tag]}
+              </Badge>
+            ))}
+          </div>
+        )}
+        {item.allergens && item.allergens.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {item.allergens.map((a) => (
+              <Badge key={a} variant="outline" className="text-[10px] px-2 py-0.5 text-muted-foreground border-border">
+                {allergenLabels[a]}
+              </Badge>
+            ))}
+          </div>
+        )}
         <Button
           size="sm"
           className="w-full gradient-accent text-primary-foreground rounded-full font-semibold text-xs"
