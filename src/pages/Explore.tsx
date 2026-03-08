@@ -9,8 +9,12 @@ import { useAppUser } from "@/contexts/AppUserContext";
 
 const Explore = () => {
   const navigate = useNavigate();
+  const { setAppUser } = useAppUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [reserveTarget, setReserveTarget] = useState<RestaurantListing | null>(null);
+
+  // Mark as app user when they access the Explore page
+  useEffect(() => { setAppUser(true); }, [setAppUser]);
 
   const filteredRestaurants = searchQuery.trim()
     ? restaurants.filter(
