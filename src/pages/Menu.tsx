@@ -36,6 +36,9 @@ const Menu = () => {
         <Link to="/" className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </Link>
+        <Link to="/profile" className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
+          <User className="w-5 h-5" />
+        </Link>
       </div>
 
       <div className="container mx-auto px-4 -mt-12 relative z-10">
