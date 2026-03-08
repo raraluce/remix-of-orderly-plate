@@ -163,7 +163,7 @@ export const menuItems: MenuItem[] = [
     id: "26", name: "Sea Bass Ceviche Bowl",
     description: "Fresh sea bass, tiger's milk, sweet potato, corn, avocado",
     price: 21.00, image: foodSushi, category: "mains",
-    allergens: ["seafood"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
+    allergens: ["fish"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
     type: "main", preference: ["fish"],
   },
 
