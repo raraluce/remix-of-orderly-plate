@@ -11,6 +11,12 @@ export type DietaryTag = "vegan" | "vegetarian" | "gluten-free" | "nut-free";
 export type FoodPreference = "meat" | "fish" | "vegetarian" | "vegan" | "surprise";
 export type HungerLevel = "light" | "normal" | "hungry" | "sharing";
 
+export type PairingTag =
+  | "red-wine" | "white-wine" | "rosé" | "sparkling" | "beer" | "cocktail"
+  | "spirit" | "non-alcoholic" | "coffee" | "tea"
+  | "bread" | "salad" | "fries" | "rice" | "pasta-side"
+  | "light-starter" | "rich-starter" | "cheese" | "chocolate-dessert" | "fruit-dessert";
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -24,6 +30,10 @@ export interface MenuItem {
   shareable: boolean;
   type: "starter" | "main" | "side" | "dessert" | "drink";
   preference: FoodPreference[];
+  /** Approximate portion size in grams (ml for drinks) */
+  portionSize: number;
+  /** Pairing metadata for recommendation engine relations */
+  pairingTags: PairingTag[];
 }
 
 export const categories = [
