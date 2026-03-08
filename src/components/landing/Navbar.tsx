@@ -18,7 +18,7 @@ const Navbar = () => {
           <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
           <a href="#benefits" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Benefits</a>
-          <Link to="/dashboard">
+          <Link to="/restaurant">
             <Button variant="ghost" size="sm" className="text-muted-foreground">Restaurant Login</Button>
           </Link>
           <Link to="/menu">
