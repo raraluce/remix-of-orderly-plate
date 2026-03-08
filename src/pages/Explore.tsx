@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Star, Clock, MapPin, ChevronRight, Bookmark, Tag } from "lucide-react";
 import { restaurants, newsItems, offerBanners, type RestaurantListing } from "@/data/restaurants";
 import ReservationSheet from "@/components/app/ReservationSheet";
 import BottomNav from "@/components/app/BottomNav";
+import { useAppUser } from "@/contexts/AppUserContext";
 
 const Explore = () => {
   const navigate = useNavigate();
