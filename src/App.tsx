@@ -24,6 +24,7 @@ import SmartExplore from "./pages/SmartExplore";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
+import ProfileSettings from "./pages/ProfileSettings";
 import RestaurantLayout from "./pages/restaurant/RestaurantLayout";
 import DashboardHome from "./pages/restaurant/DashboardHome";
 import OrdersManagement from "./pages/restaurant/OrdersManagement";
