@@ -55,6 +55,34 @@ const Menu = () => {
           <CategoryNav active={category} onChange={setCategory} />
         </div>
 
+        {/* Recommendations */}
+        {category === "popular" && recommended.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h2 className="font-display font-semibold text-sm">Recommended for You</h2>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {recommended.map((item) => (
+                <div key={`rec-${item.id}`} className="min-w-[200px] bg-card border border-primary/20 rounded-2xl overflow-hidden hover-lift flex-shrink-0">
+                  <div className="h-28 overflow-hidden">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-semibold text-xs truncate">{item.name}</h4>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-primary font-display font-bold text-xs">${item.price.toFixed(2)}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full gradient-accent text-primary-foreground font-bold uppercase">
+                        {item.tags?.[0]}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((item) => (
             <MenuCard key={item.id} item={item} />
