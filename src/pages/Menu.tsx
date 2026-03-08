@@ -21,8 +21,11 @@ const Menu = () => {
 
   const handleCheckout = () => {
     setCartOpen(false);
-    navigate("/order-confirmation");
+    navigate("/payment");
   };
+
+  // Recommended dishes based on popularity
+  const recommended = menuItems.filter((i) => i.tags?.some((t) => ["Chef's Pick", "Must Try", "Popular"].includes(t))).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background pb-24">
