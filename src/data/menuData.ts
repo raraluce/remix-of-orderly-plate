@@ -6,7 +6,7 @@ import foodDrinks from "@/assets/food-drinks.jpg";
 import foodSalad from "@/assets/food-salad.jpg";
 import heroFood from "@/assets/hero-food.jpg";
 
-export type Allergen = "gluten" | "dairy" | "nuts" | "eggs" | "soy" | "seafood" | "sesame";
+export type Allergen = "gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "dairy" | "nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "molluscs" | "lupin";
 export type DietaryTag = "vegan" | "vegetarian" | "gluten-free" | "nut-free";
 export type FoodPreference = "meat" | "fish" | "vegetarian" | "vegan" | "surprise";
 export type HungerLevel = "light" | "normal" | "hungry" | "sharing";
@@ -37,12 +37,19 @@ export const categories = [
 
 export const allergenLabels: Record<Allergen, string> = {
   gluten: "Gluten",
-  dairy: "Dairy",
-  nuts: "Nuts",
+  crustaceans: "Crustaceans",
   eggs: "Eggs",
+  fish: "Fish",
+  peanuts: "Peanuts",
   soy: "Soy",
-  seafood: "Seafood",
+  dairy: "Dairy",
+  nuts: "Tree Nuts",
+  celery: "Celery",
+  mustard: "Mustard",
   sesame: "Sesame",
+  sulphites: "Sulphites",
+  molluscs: "Molluscs",
+  lupin: "Lupin",
 };
 
 export const dietaryTagLabels: Record<DietaryTag, string> = {
@@ -72,7 +79,7 @@ export const menuItems: MenuItem[] = [
     id: "3", name: "Dragon Roll Platter",
     description: "8-piece signature roll with salmon, tuna & avocado, wasabi aioli",
     price: 22.00, image: foodSushi, category: "popular", tags: ["New"],
-    allergens: ["seafood", "soy", "sesame"], dietaryTags: [], shareable: true,
+    allergens: ["fish", "soy", "sesame"], dietaryTags: [], shareable: true,
     type: "main", preference: ["fish"],
   },
   {
@@ -114,7 +121,7 @@ export const menuItems: MenuItem[] = [
     id: "20", name: "Miso Glazed Salmon",
     description: "Atlantic salmon, white miso glaze, bok choy, sesame rice",
     price: 27.00, image: foodSushi, category: "mains", tags: ["Chef's Pick"],
-    allergens: ["seafood", "soy", "sesame"], dietaryTags: ["nut-free"], shareable: false,
+    allergens: ["fish", "soy", "sesame"], dietaryTags: ["nut-free"], shareable: false,
     type: "main", preference: ["fish"],
   },
   {
@@ -128,7 +135,7 @@ export const menuItems: MenuItem[] = [
     id: "22", name: "Prawn Linguine",
     description: "Tiger prawns, cherry tomato, chilli, garlic, white wine sauce",
     price: 25.00, image: foodPasta, category: "mains",
-    allergens: ["gluten", "seafood"], dietaryTags: ["nut-free"], shareable: false,
+    allergens: ["gluten", "crustaceans"], dietaryTags: ["nut-free"], shareable: false,
     type: "main", preference: ["fish"],
   },
   {
@@ -156,7 +163,7 @@ export const menuItems: MenuItem[] = [
     id: "26", name: "Sea Bass Ceviche Bowl",
     description: "Fresh sea bass, tiger's milk, sweet potato, corn, avocado",
     price: 21.00, image: foodSushi, category: "mains",
-    allergens: ["seafood"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
+    allergens: ["fish"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
     type: "main", preference: ["fish"],
   },
 
@@ -172,7 +179,7 @@ export const menuItems: MenuItem[] = [
     id: "11", name: "Tuna Tartare",
     description: "Yellowfin tuna, avocado, sesame, crispy wonton chips",
     price: 17.00, image: foodSushi, category: "starters", tags: ["Popular"],
-    allergens: ["seafood", "soy", "sesame", "gluten"], dietaryTags: [], shareable: true,
+    allergens: ["fish", "soy", "sesame", "gluten"], dietaryTags: [], shareable: true,
     type: "starter", preference: ["fish"],
   },
   {
@@ -200,7 +207,7 @@ export const menuItems: MenuItem[] = [
     id: "27", name: "Crispy Calamari",
     description: "Lightly battered squid, lemon aioli, rocket salad",
     price: 14.00, image: foodSushi, category: "starters", tags: ["Popular"],
-    allergens: ["gluten", "seafood", "eggs"], dietaryTags: [], shareable: true,
+    allergens: ["gluten", "molluscs", "eggs"], dietaryTags: [], shareable: true,
     type: "starter", preference: ["fish"],
   },
   {
@@ -221,7 +228,7 @@ export const menuItems: MenuItem[] = [
     id: "30", name: "Prawn Cocktail",
     description: "Atlantic prawns, Marie Rose sauce, baby gem, lemon wedge",
     price: 15.00, image: foodSushi, category: "starters",
-    allergens: ["seafood", "eggs"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
+    allergens: ["crustaceans", "eggs"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
     type: "starter", preference: ["fish"],
   },
   {

@@ -19,7 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAppUser } from "@/contexts/AppUserContext";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 
-const ALLERGENS = ["Gluten", "Dairy", "Nuts", "Shellfish", "Eggs", "Soy", "Fish", "Sesame"];
+const ALLERGENS = ["Gluten", "Crustaceans", "Eggs", "Fish", "Peanuts", "Soy", "Dairy", "Tree Nuts", "Celery", "Mustard", "Sesame", "Sulphites", "Molluscs", "Lupin"];
 const DIETARY = ["Vegetarian", "Vegan", "Pescatarian", "Halal", "Kosher", "Keto", "Paleo"];
 const SPICE_LEVELS = [
   { key: "mild", label: "Mild", emoji: "🌶️" },
