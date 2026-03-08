@@ -72,6 +72,7 @@ const App = () => (
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
                   <Route path="/feedback" element={<Feedback />} />
                   <Route path="/profile" element={<DinerProfile />} />
+                  <Route path="/settings" element={<ProfileSettings />} />
 
                   {/* Restaurant Dashboard */}
                   <Route path="/restaurant" element={<RestaurantLayout />}>

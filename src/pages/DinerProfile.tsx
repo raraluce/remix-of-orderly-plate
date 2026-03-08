@@ -81,7 +81,7 @@ const DinerProfile = () => {
               <p className="text-xs text-muted-foreground">Preferences & history</p>
             </div>
           </div>
-          <button className="p-2 rounded-full hover:bg-secondary transition-colors">
+          <button onClick={() => navigate("/settings")} className="p-2 rounded-full hover:bg-secondary transition-colors">
             <Settings className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
