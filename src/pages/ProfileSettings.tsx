@@ -275,7 +275,7 @@ const ProfileSettings = () => {
         return (
           <div className="space-y-4 px-4">
             <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-              <div className="w-12 h-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-400 flex items-center justify-center text-[10px] font-bold text-primary-foreground">
+              <div className="w-12 h-8 rounded-lg bg-primary/80 flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                 VISA
               </div>
               <div className="flex-1">
