@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Clock, Users, Check, X } from "lucide-react";
+import { Calendar, Clock, Users, Check, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { RestaurantListing } from "@/data/restaurants";
+import { consumerPatternService } from "@/services/consumerPatternService";
 
 interface ReservationSheetProps {
   open: boolean;
@@ -23,16 +24,12 @@ const ReservationSheet = ({ open, onClose, restaurant }: ReservationSheetProps) 
   });
   const [selectedTime, setSelectedTime] = useState("20:00");
 
-  const handleConfirm = () => {
-    setStep("confirmed");
-  };
+  // Get learned user profile (using mock user-1)
+  const userProfile = consumerPatternService.getUserProfile("user-1");
 
-  const handleClose = () => {
-    setStep("form");
-    onClose();
-  };
+  const handleConfirm = () => setStep("confirmed");
+  const handleClose = () => { setStep("form"); onClose(); };
 
-  // Generate next 7 days
   const dates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -77,9 +74,7 @@ const ReservationSheet = ({ open, onClose, restaurant }: ReservationSheetProps) 
                           ? "gradient-accent text-primary-foreground glow-accent-sm"
                           : "bg-secondary text-foreground"
                       }`}
-                    >
-                      {n}
-                    </button>
+                    >{n}</button>
                   ))}
                 </div>
               </div>
@@ -123,9 +118,7 @@ const ReservationSheet = ({ open, onClose, restaurant }: ReservationSheetProps) 
                           ? "gradient-accent text-primary-foreground glow-accent-sm"
                           : "bg-secondary text-foreground"
                       }`}
-                    >
-                      {t}
-                    </button>
+                    >{t}</button>
                   ))}
                 </div>
               </div>
@@ -143,7 +136,7 @@ const ReservationSheet = ({ open, onClose, restaurant }: ReservationSheetProps) 
               key="confirmed"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center text-center py-8 space-y-4"
+              className="flex flex-col items-center text-center py-6 space-y-4"
             >
               <div className="w-20 h-20 rounded-full gradient-accent flex items-center justify-center glow-accent">
                 <Check className="w-10 h-10 text-primary-foreground" />
@@ -170,6 +163,59 @@ const ReservationSheet = ({ open, onClose, restaurant }: ReservationSheetProps) 
                   <span className="font-semibold">{guests}</span>
                 </div>
               </div>
+
+              {/* Learned user preferences */}
+              {userProfile && userProfile.totalOrders >= 2 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="w-full max-w-xs"
+                >
+                  <div className="bg-card border border-primary/20 rounded-2xl p-4 text-left space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <h4 className="font-display font-bold text-sm">Your dining profile</h4>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Based on your last {userProfile.totalOrders} visits
+                    </p>
+
+                    {userProfile.topPreferences.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground">You usually enjoy</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {userProfile.topPreferences.slice(0, 3).map((p) => (
+                            <span key={p.preference} className="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold capitalize">
+                              {p.preference}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {userProfile.frequentPairings.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground">Your favourite combos</p>
+                        {userProfile.frequentPairings.slice(0, 2).map((pair, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <TrendingUp className="w-3 h-3 text-primary shrink-0" />
+                            <span className="text-foreground">
+                              {pair.dishName} <span className="text-muted-foreground">+</span> {pair.pairedWith}
+                            </span>
+                            <span className="ml-auto text-[10px] text-muted-foreground">{pair.count}×</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <p className="text-[10px] text-muted-foreground italic">
+                      Avg. spend: ${userProfile.averageSpend.toFixed(0)} per visit
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
               <Button variant="outline" className="rounded-2xl" onClick={handleClose}>
                 Done
               </Button>
