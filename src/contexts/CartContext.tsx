@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import type { PairingTag, FoodPreference } from "@/data/menuData";
 
 export interface CartItem {
   id: string;
@@ -6,6 +7,11 @@ export interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  /** Metadata for analytics / recommendation engine */
+  pairingTags?: PairingTag[];
+  category?: string;
+  type?: string;
+  preference?: FoodPreference[];
 }
 
 interface CartContextType {
