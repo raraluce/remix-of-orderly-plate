@@ -73,7 +73,7 @@ const CartSheet = ({ open, onClose, onCheckout }: Props) => {
               className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent"
               onClick={onCheckout}
             >
-              <CreditCard className="w-5 h-5 mr-2" /> Pay Now
+              <CreditCard className="w-5 h-5 mr-2" /> Continue to Payment
             </Button>
           </div>
         )}
