@@ -35,9 +35,12 @@ const Explore = () => {
               Discover with <span className="text-gradient">.bite</span>
             </h1>
           </div>
-          <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center text-primary-foreground text-xs font-bold">
+          <button
+            onClick={() => navigate("/profile")}
+            className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center text-primary-foreground text-xs font-bold"
+          >
             JD
-          </div>
+          </button>
         </div>
       </div>
 
