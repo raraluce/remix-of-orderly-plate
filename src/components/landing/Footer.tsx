@@ -11,7 +11,7 @@ const Footer = () => (
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
           <Link to="/menu" className="hover:text-foreground transition-colors">Demo</Link>
-          <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
+          <Link to="/restaurant" className="hover:text-foreground transition-colors">Dashboard</Link>
         </div>
         <p className="text-xs text-muted-foreground">© 2026 bite. All rights reserved.</p>
       </div>

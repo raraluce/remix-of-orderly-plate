@@ -44,14 +44,14 @@ const OrderConfirmation = () => {
         </div>
 
         <div className="flex flex-col gap-3">
-          <Link to="/menu">
+          <Link to="/feedback">
             <Button className="w-full gradient-accent text-primary-foreground rounded-full font-semibold">
-              Order More
+              Rate Your Experience
             </Button>
           </Link>
-          <Link to="/">
+          <Link to="/menu">
             <Button variant="outline" className="w-full rounded-full border-border text-foreground">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
+              Order More
             </Button>
           </Link>
         </div>
