@@ -546,6 +546,13 @@ const SmartMenu = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {step === "results" && (
+        <>
+          <FloatingCart onClick={() => setCartOpen(true)} />
+          <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} onCheckout={() => navigate("/payment")} />
+        </>
+      )}
     </div>
   );
 };
