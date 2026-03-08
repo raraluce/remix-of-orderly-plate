@@ -32,16 +32,16 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-              <Link to="/menu">
+              <Link to="/explore">
                 <Button size="lg" className="gradient-accent text-primary-foreground rounded-full px-8 text-base font-semibold glow-accent hover:scale-105 transition-transform">
-                  Try the Demo <ArrowRight className="ml-2 h-5 w-5" />
+                  Open the App <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <a href="#how-it-works">
+              <Link to="/qr?table=3">
                 <Button size="lg" variant="outline" className="rounded-full px-8 text-base border-border text-foreground hover:bg-secondary">
-                  See How It Works
+                  Try QR Demo
                 </Button>
-              </a>
+              </Link>
             </div>
 
             <div className="flex items-center gap-8 pt-4 animate-fade-up" style={{ animationDelay: "0.4s" }}>

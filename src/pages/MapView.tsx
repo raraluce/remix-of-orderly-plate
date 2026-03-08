@@ -45,8 +45,8 @@ const MapView = () => {
         {/* User location */}
         <div className="absolute top-[50%] left-[45%] z-10">
           <div className="relative">
-            <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-primary-foreground shadow-lg" />
-            <div className="absolute inset-0 w-4 h-4 rounded-full bg-blue-500/30 animate-ping" />
+            <div className="w-4 h-4 rounded-full bg-primary border-2 border-primary-foreground shadow-lg" />
+            <div className="absolute inset-0 w-4 h-4 rounded-full bg-primary/30 animate-ping" />
           </div>
         </div>
 
