@@ -79,7 +79,7 @@ export const menuItems: MenuItem[] = [
     id: "3", name: "Dragon Roll Platter",
     description: "8-piece signature roll with salmon, tuna & avocado, wasabi aioli",
     price: 22.00, image: foodSushi, category: "popular", tags: ["New"],
-    allergens: ["seafood", "soy", "sesame"], dietaryTags: [], shareable: true,
+    allergens: ["fish", "soy", "sesame"], dietaryTags: [], shareable: true,
     type: "main", preference: ["fish"],
   },
   {
