@@ -12,13 +12,19 @@ interface UserPreferencesContextType {
 
 const allergenLabelToKey: Record<string, Allergen> = {
   Gluten: "gluten",
-  Dairy: "dairy",
-  Nuts: "nuts",
-  Shellfish: "seafood",
+  Crustaceans: "crustaceans",
   Eggs: "eggs",
+  Fish: "fish",
+  Peanuts: "peanuts",
   Soy: "soy",
-  Fish: "seafood",
+  Dairy: "dairy",
+  "Tree Nuts": "nuts",
+  Celery: "celery",
+  Mustard: "mustard",
   Sesame: "sesame",
+  Sulphites: "sulphites",
+  Molluscs: "molluscs",
+  Lupin: "lupin",
 };
 
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
