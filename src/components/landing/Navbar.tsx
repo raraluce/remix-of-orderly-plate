@@ -18,12 +18,15 @@ const Navbar = () => {
           <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
           <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
           <a href="#benefits" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Benefits</a>
+          <Link to="/login">
+            <Button variant="ghost" size="sm" className="text-muted-foreground">Sign In</Button>
+          </Link>
           <Link to="/restaurant">
             <Button variant="ghost" size="sm" className="text-muted-foreground">Restaurant Login</Button>
           </Link>
-          <Link to="/menu">
+          <Link to="/register">
             <Button size="sm" className="gradient-accent text-primary-foreground rounded-full px-6 font-semibold">
-              Try Demo
+              Get Started
             </Button>
           </Link>
         </div>
