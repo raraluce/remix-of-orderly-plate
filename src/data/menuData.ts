@@ -37,12 +37,19 @@ export const categories = [
 
 export const allergenLabels: Record<Allergen, string> = {
   gluten: "Gluten",
-  dairy: "Dairy",
-  nuts: "Nuts",
+  crustaceans: "Crustaceans",
   eggs: "Eggs",
+  fish: "Fish",
+  peanuts: "Peanuts",
   soy: "Soy",
-  seafood: "Seafood",
+  dairy: "Dairy",
+  nuts: "Tree Nuts",
+  celery: "Celery",
+  mustard: "Mustard",
   sesame: "Sesame",
+  sulphites: "Sulphites",
+  molluscs: "Molluscs",
+  lupin: "Lupin",
 };
 
 export const dietaryTagLabels: Record<DietaryTag, string> = {

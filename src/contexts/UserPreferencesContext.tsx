@@ -30,7 +30,7 @@ const allergenLabelToKey: Record<string, Allergen> = {
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
 
 export const UserPreferencesProvider = ({ children }: { children: ReactNode }) => {
-  const [allergens, setAllergens] = useState<string[]>(["Nuts", "Shellfish"]);
+  const [allergens, setAllergens] = useState<string[]>(["Peanuts", "Crustaceans"]);
   const [dietary, setDietary] = useState<string[]>(["Pescatarian"]);
 
   const toggleAllergen = (a: string) =>

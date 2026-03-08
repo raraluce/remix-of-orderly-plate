@@ -12,7 +12,7 @@ import foodSushi from "@/assets/food-sushi.jpg";
 import foodPizza from "@/assets/food-pizza.jpg";
 import foodDessert from "@/assets/food-dessert.jpg";
 
-const allergenOptions = ["Gluten", "Dairy", "Nuts", "Shellfish", "Eggs", "Soy", "Fish", "Sesame"];
+const allergenOptions = ["Gluten", "Crustaceans", "Eggs", "Fish", "Peanuts", "Soy", "Dairy", "Tree Nuts", "Celery", "Mustard", "Sesame", "Sulphites", "Molluscs", "Lupin"];
 const dietaryOptions = ["Vegetarian", "Vegan", "Keto", "Halal", "Kosher", "Pescatarian", "Paleo"];
 
 const favorites = [
