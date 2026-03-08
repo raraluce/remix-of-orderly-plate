@@ -48,6 +48,9 @@ const App = () => (
                   {/* Landing */}
                   <Route path="/" element={<Index />} />
 
+                  {/* Registration */}
+                  <Route path="/register" element={<Register />} />
+
                   {/* App User Flow (registered/downloaded app) */}
                   <Route path="/explore" element={<Explore />} />
                   <Route path="/smart-explore" element={<SmartExplore />} />
