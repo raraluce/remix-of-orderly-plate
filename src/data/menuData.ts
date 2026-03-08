@@ -228,7 +228,7 @@ export const menuItems: MenuItem[] = [
     id: "30", name: "Prawn Cocktail",
     description: "Atlantic prawns, Marie Rose sauce, baby gem, lemon wedge",
     price: 15.00, image: foodSushi, category: "starters",
-    allergens: ["seafood", "eggs"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
+    allergens: ["crustaceans", "eggs"], dietaryTags: ["gluten-free", "nut-free"], shareable: false,
     type: "starter", preference: ["fish"],
   },
   {

@@ -24,7 +24,9 @@ const allergenOptions: { id: Allergen; label: string; emoji: string }[] = [
   { id: "nuts", label: "Nut allergy", emoji: "🥜" },
   { id: "eggs", label: "Egg allergy", emoji: "🥚" },
   { id: "soy", label: "Soy allergy", emoji: "🫘" },
-  { id: "seafood", label: "Seafood allergy", emoji: "🦐" },
+  { id: "fish", label: "Fish allergy", emoji: "🐟" },
+  { id: "crustaceans", label: "Crustacean allergy", emoji: "🦐" },
+  { id: "molluscs", label: "Mollusc allergy", emoji: "🐚" },
 ];
 
 const preferenceOptions: { id: FoodPreference; label: string; icon: React.ReactNode }[] = [
