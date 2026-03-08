@@ -6,16 +6,24 @@ import foodSalad from "@/assets/food-salad.jpg";
 import foodDessert from "@/assets/food-dessert.jpg";
 import foodDrinks from "@/assets/food-drinks.jpg";
 
+export type CuisineType = "european" | "japanese" | "italian" | "mexican" | "indian" | "american" | "thai" | "mediterranean";
+export type VibeType = "romantic" | "casual" | "fine-dining" | "family" | "trendy" | "cozy";
+export type OccasionType = "date" | "friends" | "business" | "solo" | "celebration" | "family";
+export type BudgetType = "$" | "$$" | "$$$" | "$$$$";
+
 export interface RestaurantListing {
   id: string;
   name: string;
   slug: string;
   description: string;
   cuisine: string;
+  cuisineTypes: CuisineType[];
+  vibes: VibeType[];
+  occasions: OccasionType[];
   coverImage: string;
   rating: number;
   reviewCount: number;
-  priceRange: "$" | "$$" | "$$$" | "$$$$";
+  priceRange: BudgetType;
   address: string;
   distance: string;
   deliveryTime: string;
