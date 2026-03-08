@@ -37,6 +37,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, { ...item, quantity: 1 }];
     });
+    // Fire analytics with pairing metadata for recommendation relations
+    try {
+      const { analyticsService } = require("@/services/analyticsService");
+      analyticsService.track("dish_added_to_cart", {
+        dishId: item.id,
+        dishName: item.name,
+        category: item.category,
+        type: item.type,
+        preference: item.preference,
+        pairingTags: item.pairingTags,
+      });
+    } catch {}
   };
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
