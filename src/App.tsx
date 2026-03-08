@@ -21,6 +21,7 @@ import Explore from "./pages/Explore";
 import MapView from "./pages/MapView";
 import RestaurantView from "./pages/RestaurantView";
 import SmartExplore from "./pages/SmartExplore";
+import Register from "./pages/Register";
 import RestaurantLayout from "./pages/restaurant/RestaurantLayout";
 import DashboardHome from "./pages/restaurant/DashboardHome";
 import OrdersManagement from "./pages/restaurant/OrdersManagement";
@@ -46,6 +47,9 @@ const App = () => (
                 <Routes>
                   {/* Landing */}
                   <Route path="/" element={<Index />} />
+
+                  {/* Registration */}
+                  <Route path="/register" element={<Register />} />
 
                   {/* App User Flow (registered/downloaded app) */}
                   <Route path="/explore" element={<Explore />} />

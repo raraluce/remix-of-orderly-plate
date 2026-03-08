@@ -32,9 +32,9 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-              <Link to="/explore">
+              <Link to="/register">
                 <Button size="lg" className="gradient-accent text-primary-foreground rounded-full px-8 text-base font-semibold glow-accent hover:scale-105 transition-transform">
-                  Open the App <ArrowRight className="ml-2 h-5 w-5" />
+                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/qr?table=3">
