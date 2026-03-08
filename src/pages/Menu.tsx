@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Star, Clock, Sparkles, User, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Clock, Sparkles, User, ShieldCheck, Search, X, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MenuCard from "@/components/menu/MenuCard";
 import CategoryNav from "@/components/menu/CategoryNav";
@@ -9,22 +9,38 @@ import CartSheet from "@/components/menu/CartSheet";
 import { menuItems } from "@/data/menuData";
 import { useCart } from "@/contexts/CartContext";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { useTableSession } from "@/contexts/TableSessionContext";
 import { Switch } from "@/components/ui/switch";
+import { analyticsService } from "@/services/analyticsService";
 import heroFood from "@/assets/hero-food.jpg";
 
 const Menu = () => {
   const [category, setCategory] = useState("popular");
   const [cartOpen, setCartOpen] = useState(false);
   const [personalizedMode, setPersonalizedMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const navigate = useNavigate();
   const { clearCart } = useCart();
   const { allergenKeys, allergens } = useUserPreferences();
+  const { session, tableNumber } = useTableSession();
 
   const isCompatible = (item: typeof menuItems[0]) => {
     return !item.allergens.some((a) => allergenKeys.includes(a));
   };
 
-  const baseFiltered = category === "popular"
+  // Search filter
+  const searchFiltered = searchQuery.trim()
+    ? menuItems.filter((i) =>
+        i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        i.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        i.dietaryTags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : null;
+
+  const baseFiltered = searchFiltered
+    ? searchFiltered
+    : category === "popular"
     ? menuItems.filter((i) => i.tags?.some((t) => ["Chef's Pick", "Popular", "New", "Must Try"].includes(t)))
     : menuItems.filter((i) => i.category === category);
 
@@ -33,6 +49,13 @@ const Menu = () => {
   const handleCheckout = () => {
     setCartOpen(false);
     navigate("/payment");
+  };
+
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    if (q.trim()) {
+      analyticsService.track("search_performed", { query: q });
+    }
   };
 
   const recommended = menuItems
@@ -46,18 +69,34 @@ const Menu = () => {
       <div className="relative h-48 overflow-hidden">
         <img src={heroFood} alt="Restaurant" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        <Link to="/" className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
+        <Link to={session ? "/table" : "/"} className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <Link to="/profile" className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
-          <User className="w-5 h-5" />
-        </Link>
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <button
+            onClick={() => setShowSearch(!showSearch)}
+            className="w-10 h-10 rounded-full glass flex items-center justify-center"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+          <Link to="/profile" className="w-10 h-10 rounded-full glass flex items-center justify-center">
+            <User className="w-5 h-5" />
+          </Link>
+        </div>
       </div>
 
       <div className="container mx-auto px-4 -mt-12 relative z-10">
         <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-display font-bold mb-1">The Grand Kitchen</h1>
+            <div>
+              <h1 className="text-2xl font-display font-bold mb-1">The Grand Kitchen</h1>
+              {session && (
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Users className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs text-primary font-semibold">Table {tableNumber} · {session.users.length} guest{session.users.length > 1 ? "s" : ""}</span>
+                </div>
+              )}
+            </div>
             <Link to="/smart-menu" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-accent text-primary-foreground text-xs font-bold shadow-lg animate-pulse hover:animate-none transition-all">
               <Sparkles className="w-3.5 h-3.5" />
               Smart Menu
@@ -69,6 +108,39 @@ const Menu = () => {
             <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> 0.3 mi</span>
           </div>
         </div>
+
+        {/* Search Bar */}
+        <AnimatePresence>
+          {showSearch && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden mb-4"
+            >
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder="Search dishes, ingredients…"
+                  className="w-full bg-card border border-border rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => { setSearchQuery(""); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Personalized toggle */}
         <div className="flex items-center justify-between mb-4 bg-card border border-border rounded-xl px-4 py-3">
@@ -102,12 +174,20 @@ const Menu = () => {
           )}
         </AnimatePresence>
 
-        <div className="mb-6 sticky top-0 z-20 bg-background py-3">
-          <CategoryNav active={category} onChange={setCategory} />
-        </div>
+        {!searchQuery && (
+          <div className="mb-6 sticky top-0 z-20 bg-background py-3">
+            <CategoryNav active={category} onChange={setCategory} />
+          </div>
+        )}
+
+        {searchQuery && (
+          <p className="text-xs text-muted-foreground mb-4">
+            {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{searchQuery}"
+          </p>
+        )}
 
         {/* Recommendations */}
-        {category === "popular" && recommended.length > 0 && (
+        {!searchQuery && category === "popular" && recommended.length > 0 && (
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -159,7 +239,9 @@ const Menu = () => {
               exit={{ opacity: 0 }}
               className="text-center py-16"
             >
-              <p className="text-muted-foreground text-sm">No dishes match your filters in this category.</p>
+              <p className="text-muted-foreground text-sm">
+                {searchQuery ? `No dishes found for "${searchQuery}"` : "No dishes match your filters in this category."}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
