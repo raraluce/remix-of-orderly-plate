@@ -1,7 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Eye, ShoppingBag, CreditCard, QrCode, Sparkles, MousePointerClick } from "lucide-react";
+import { TrendingUp, Eye, ShoppingBag, CreditCard, QrCode, Sparkles, ArrowRight } from "lucide-react";
 import { analyticsService } from "@/services/analyticsService";
-import { menuItems } from "@/data/menuData";
+import { consumerPatternService } from "@/services/consumerPatternService";
 
 const revenueData = [
   { day: "Mon", revenue: 1800 },
@@ -31,6 +31,10 @@ const categoryData = [
 
 const AnalyticsDashboard = () => {
   const metrics = analyticsService.getMetrics();
+  const categoryPairings = consumerPatternService.getCategoryPairings();
+
+  // Get top 8 pairings for display
+  const topPairings = categoryPairings.slice(0, 8);
 
   const metricCards = [
     { label: "QR Scans", value: metrics.qrScans, icon: QrCode },
@@ -90,6 +94,38 @@ const AnalyticsDashboard = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      {/* Consumer Pairing Patterns — learned from orders */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <h3 className="font-display font-bold">Consumer Pairing Patterns</h3>
+        </div>
+        <p className="text-xs text-muted-foreground mb-5">
+          Auto-learned from {consumerPatternService.getAllOrders().length} orders — shows which categories are ordered together
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {topPairings.map((p, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 p-3 bg-secondary rounded-xl"
+            >
+              <span className="text-xs font-bold capitalize text-foreground min-w-[70px]">{p.fromCategory}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <span className="text-xs font-bold capitalize text-foreground min-w-[70px]">{p.toCategory}</span>
+              <div className="ml-auto flex items-center gap-2">
+                <div className="w-16 h-2 rounded-full bg-background overflow-hidden">
+                  <div
+                    className="h-full rounded-full gradient-accent"
+                    style={{ width: `${Math.min(p.percentage, 100)}%` }}
+                  />
+                </div>
+                <span className="text-[11px] font-bold text-primary min-w-[35px] text-right">{p.percentage}%</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

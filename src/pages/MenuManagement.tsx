@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { menuItems as initialItems, categories as initialCategories, type MenuItem, allergenLabels, pairingTagLabels } from "@/data/menuData";
+import { menuItems as initialItems, categories as initialCategories, type MenuItem, allergenLabels } from "@/data/menuData";
 import DishFormSheet from "@/components/restaurant/DishFormSheet";
 
 const MenuManagement = () => {
@@ -99,13 +99,6 @@ const MenuManagement = () => {
                     </>
                   )}
                 </div>
-                {dish.pairingTags.length > 0 && (
-                  <div className="flex gap-1 flex-wrap mt-1">
-                    {dish.pairingTags.map((p) => (
-                      <span key={p} className="px-1.5 py-0.5 text-[9px] rounded-full bg-accent text-accent-foreground">{pairingTagLabels[p]}</span>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="flex items-center gap-2 shrink-0 mt-2">

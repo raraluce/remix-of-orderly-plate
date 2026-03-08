@@ -5,13 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
-  type MenuItem, type Allergen, type PairingTag,
-  allergenLabels, pairingTagLabels,
+  type MenuItem, type Allergen,
+  allergenLabels,
   categories as allCategories,
 } from "@/data/menuData";
 
 const allergenKeys = Object.keys(allergenLabels) as Allergen[];
-const pairingKeys = Object.keys(pairingTagLabels) as PairingTag[];
 const typeOptions: MenuItem["type"][] = ["starter", "main", "side", "dessert", "drink"];
 
 interface DishFormSheetProps {
@@ -130,36 +129,18 @@ const DishFormSheet = ({ open, onOpenChange, dish, onSave }: DishFormSheetProps)
             </div>
           </div>
 
-          {/* Pairing Metadata */}
-          <div className="space-y-3">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pairing Tags</label>
-            <p className="text-[11px] text-muted-foreground -mt-1">Used to build recommendation relations (e.g. "meat → red wine")</p>
-            <div className="flex flex-wrap gap-2">
-              {pairingKeys.map((p) => {
-                const active = form.pairingTags.includes(p);
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => set("pairingTags", toggleInArray(form.pairingTags, p))}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
-                      active
-                        ? "gradient-accent text-primary-foreground"
-                        : "bg-secondary text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {pairingTagLabels[p]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Shareable toggle */}
           <label className="flex items-center gap-3 px-3 py-3 rounded-xl bg-secondary cursor-pointer">
             <Checkbox checked={form.shareable} onCheckedChange={(v) => set("shareable", !!v)} />
             <span className="text-sm font-medium">Shareable dish</span>
           </label>
+
+          {/* Info about auto-learned pairings */}
+          <div className="bg-accent/50 rounded-xl p-4">
+            <p className="text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">💡 Pairing data</span> is automatically learned from consumer ordering patterns — no manual tagging needed.
+            </p>
+          </div>
 
           <Button onClick={handleSave} className="w-full gradient-accent text-primary-foreground rounded-full font-semibold" disabled={!form.name || !form.price}>
             <Save className="w-4 h-4 mr-2" /> {dish ? "Update Dish" : "Save Dish"}
