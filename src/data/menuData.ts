@@ -6,7 +6,7 @@ import foodDrinks from "@/assets/food-drinks.jpg";
 import foodSalad from "@/assets/food-salad.jpg";
 import heroFood from "@/assets/hero-food.jpg";
 
-export type Allergen = "gluten" | "dairy" | "nuts" | "eggs" | "soy" | "seafood" | "sesame";
+export type Allergen = "gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "dairy" | "nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "molluscs" | "lupin";
 export type DietaryTag = "vegan" | "vegetarian" | "gluten-free" | "nut-free";
 export type FoodPreference = "meat" | "fish" | "vegetarian" | "vegan" | "surprise";
 export type HungerLevel = "light" | "normal" | "hungry" | "sharing";
