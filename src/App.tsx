@@ -11,6 +11,7 @@ import Payment from "./pages/Payment";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import DinerProfile from "./pages/DinerProfile";
 import MenuManagement from "./pages/MenuManagement";
+import SmartMenu from "./pages/SmartMenu";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/menu" element={<Menu />} />
+            <Route path="/smart-menu" element={<SmartMenu />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/menu-management" element={<MenuManagement />} />
