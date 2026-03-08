@@ -286,7 +286,7 @@ const ProfileSettings = () => {
             </div>
 
             <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-              <div className="w-12 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-400 flex items-center justify-center text-[10px] font-bold text-primary-foreground">
+              <div className="w-12 h-8 rounded-lg bg-accent flex items-center justify-center text-[10px] font-bold text-accent-foreground">
                 MC
               </div>
               <div className="flex-1">
