@@ -1,23 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Star, Clock, Sparkles, User, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import MenuCard from "@/components/menu/MenuCard";
 import CategoryNav from "@/components/menu/CategoryNav";
 import FloatingCart from "@/components/menu/FloatingCart";
 import CartSheet from "@/components/menu/CartSheet";
-import { menuItems, type Allergen, type DietaryTag } from "@/data/menuData";
+import { menuItems } from "@/data/menuData";
 import { useCart } from "@/contexts/CartContext";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { Switch } from "@/components/ui/switch";
 import heroFood from "@/assets/hero-food.jpg";
-
-// Simulated user preferences (would come from profile/context in production)
-const userAllergens: Allergen[] = ["nuts", "seafood"];
-const userDietaryPrefs: DietaryTag[] = [];
-
-const isCompatible = (item: typeof menuItems[0]) => {
-  const hasAllergen = item.allergens.some((a) => userAllergens.includes(a));
-  return !hasAllergen;
-};
 
 const Menu = () => {
   const [category, setCategory] = useState("popular");
@@ -25,6 +18,11 @@ const Menu = () => {
   const [personalizedMode, setPersonalizedMode] = useState(false);
   const navigate = useNavigate();
   const { clearCart } = useCart();
+  const { allergenKeys, allergens } = useUserPreferences();
+
+  const isCompatible = (item: typeof menuItems[0]) => {
+    return !item.allergens.some((a) => allergenKeys.includes(a));
+  };
 
   const baseFiltered = category === "popular"
     ? menuItems.filter((i) => i.tags?.some((t) => ["Chef's Pick", "Popular", "New", "Must Try"].includes(t)))
@@ -78,15 +76,25 @@ const Menu = () => {
           <Switch checked={personalizedMode} onCheckedChange={setPersonalizedMode} />
         </div>
 
-        {personalizedMode && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {userAllergens.map((a) => (
-              <span key={a} className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-destructive/15 text-destructive border border-destructive/20 capitalize">
-                No {a}
-              </span>
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+          {personalizedMode && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden mb-4"
+            >
+              <div className="flex flex-wrap gap-1.5">
+                {allergens.map((a) => (
+                  <span key={a} className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+                    No {a}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="mb-6 sticky top-0 z-20 bg-background py-3">
           <CategoryNav active={category} onChange={setCategory} />
@@ -120,17 +128,35 @@ const Menu = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((item) => (
-            <MenuCard key={item.id} item={item} />
-          ))}
-        </div>
+        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.25 }}
+              >
+                <MenuCard item={item} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
-        {filtered.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-sm">No dishes match your filters in this category.</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {filtered.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-16"
+            >
+              <p className="text-muted-foreground text-sm">No dishes match your filters in this category.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <FloatingCart onClick={() => setCartOpen(true)} />
