@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { menuItems as initialItems, categories as initialCategories, type MenuItem, allergenLabels, pairingTagLabels } from "@/data/menuData";
+import { menuItems as initialItems, categories as initialCategories, type MenuItem, allergenLabels } from "@/data/menuData";
 import DishFormSheet from "@/components/restaurant/DishFormSheet";
 
 const MenuManagement = () => {
