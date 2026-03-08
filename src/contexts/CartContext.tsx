@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import type { PairingTag, FoodPreference } from "@/data/menuData";
 
 export interface CartItem {
   id: string;
@@ -6,6 +7,11 @@ export interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  /** Metadata for analytics / recommendation engine */
+  pairingTags?: PairingTag[];
+  category?: string;
+  type?: string;
+  preference?: FoodPreference[];
 }
 
 interface CartContextType {
@@ -31,6 +37,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, { ...item, quantity: 1 }];
     });
+    // Fire analytics with pairing metadata for recommendation relations
+    try {
+      const { analyticsService } = require("@/services/analyticsService");
+      analyticsService.track("dish_added_to_cart", {
+        dishId: item.id,
+        dishName: item.name,
+        category: item.category,
+        type: item.type,
+        preference: item.preference,
+        pairingTags: item.pairingTags,
+      });
+    } catch {}
   };
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));

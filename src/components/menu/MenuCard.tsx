@@ -46,10 +46,18 @@ const MenuCard = ({ item }: { item: MenuItem }) => {
             ))}
           </div>
         )}
+        {item.portionSize > 0 && (
+          <p className="text-[10px] text-muted-foreground mb-2">
+            Portion: {item.portionSize}{item.type === "drink" ? "ml" : "g"}
+          </p>
+        )}
         <Button
           size="sm"
           className="w-full gradient-accent text-primary-foreground rounded-full font-semibold text-xs"
-          onClick={() => addItem({ id: item.id, name: item.name, price: item.price, image: item.image })}
+          onClick={() => addItem({
+            id: item.id, name: item.name, price: item.price, image: item.image,
+            pairingTags: item.pairingTags, category: item.category, type: item.type, preference: item.preference,
+          })}
         >
           <Plus className="w-4 h-4 mr-1" /> Add to Order
         </Button>
