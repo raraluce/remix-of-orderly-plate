@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, DollarSign, AlertTriangle, Leaf, Star, TrendingUp, Utensils } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import foodPasta from "@/assets/food-pasta.jpg";
 import foodSushi from "@/assets/food-sushi.jpg";
 import foodPizza from "@/assets/food-pizza.jpg";
@@ -25,21 +23,14 @@ const orderHistory = [
 ];
 
 const DinerProfile = () => {
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>(["Nuts", "Shellfish"]);
-  const [selectedDietary, setSelectedDietary] = useState<string[]>(["Pescatarian"]);
-
-  const toggleAllergen = (a: string) =>
-    setSelectedAllergens((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
-
-  const toggleDietary = (d: string) =>
-    setSelectedDietary((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]));
+  const { allergens: selectedAllergens, dietary: selectedDietary, toggleAllergen, toggleDietary } = useUserPreferences();
 
   return (
     <div className="min-h-screen bg-background pb-12">
       {/* Header */}
       <header className="border-b border-border glass sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Link to="/" className="p-2 rounded-full hover:bg-secondary transition-colors">
+          <Link to="/menu" className="p-2 rounded-full hover:bg-secondary transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
