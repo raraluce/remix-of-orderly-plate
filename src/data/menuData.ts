@@ -121,7 +121,7 @@ export const menuItems: MenuItem[] = [
     id: "20", name: "Miso Glazed Salmon",
     description: "Atlantic salmon, white miso glaze, bok choy, sesame rice",
     price: 27.00, image: foodSushi, category: "mains", tags: ["Chef's Pick"],
-    allergens: ["seafood", "soy", "sesame"], dietaryTags: ["nut-free"], shareable: false,
+    allergens: ["fish", "soy", "sesame"], dietaryTags: ["nut-free"], shareable: false,
     type: "main", preference: ["fish"],
   },
   {
