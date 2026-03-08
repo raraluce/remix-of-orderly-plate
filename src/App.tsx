@@ -11,6 +11,7 @@ import Payment from "./pages/Payment";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import DinerProfile from "./pages/DinerProfile";
 import MenuManagement from "./pages/MenuManagement";
+import SmartMenu from "./pages/SmartMenu";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
