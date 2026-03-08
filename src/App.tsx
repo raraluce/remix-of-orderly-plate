@@ -26,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/menu" element={<Menu />} />
+            <Route path="/smart-menu" element={<SmartMenu />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/menu-management" element={<MenuManagement />} />
