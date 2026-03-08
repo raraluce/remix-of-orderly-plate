@@ -56,7 +56,13 @@ const Menu = () => {
 
       <div className="container mx-auto px-4 -mt-12 relative z-10">
         <div className="mb-4">
-          <h1 className="text-2xl font-display font-bold mb-1">The Grand Kitchen</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-display font-bold mb-1">The Grand Kitchen</h1>
+            <Link to="/smart-menu" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-accent text-primary-foreground text-xs font-bold shadow-lg animate-pulse hover:animate-none transition-all">
+              <Sparkles className="w-3.5 h-3.5" />
+              Smart Menu
+            </Link>
+          </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><Star className="w-4 h-4 text-primary fill-primary" /> 4.8</span>
             <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> 20-30 min</span>
