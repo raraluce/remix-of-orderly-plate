@@ -135,7 +135,7 @@ export const menuItems: MenuItem[] = [
     id: "22", name: "Prawn Linguine",
     description: "Tiger prawns, cherry tomato, chilli, garlic, white wine sauce",
     price: 25.00, image: foodPasta, category: "mains",
-    allergens: ["gluten", "seafood"], dietaryTags: ["nut-free"], shareable: false,
+    allergens: ["gluten", "crustaceans"], dietaryTags: ["nut-free"], shareable: false,
     type: "main", preference: ["fish"],
   },
   {
