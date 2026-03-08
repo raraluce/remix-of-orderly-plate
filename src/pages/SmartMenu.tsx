@@ -58,6 +58,8 @@ const SmartMenu = () => {
   const [tableSize, setTableSize] = useState(1);
   const [recommendation, setRecommendation] = useState<TableRecommendation | null>(null);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [addedItemId, setAddedItemId] = useState<string | null>(null);
 
   const goNext = (next: Step) => setStep(next);
 
