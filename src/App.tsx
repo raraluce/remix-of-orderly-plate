@@ -49,6 +49,7 @@ const App = () => (
 
                   {/* App User Flow (registered/downloaded app) */}
                   <Route path="/explore" element={<Explore />} />
+                  <Route path="/smart-explore" element={<SmartExplore />} />
                   <Route path="/map" element={<MapView />} />
                   <Route path="/restaurant-view/:id" element={<RestaurantView />} />
 
