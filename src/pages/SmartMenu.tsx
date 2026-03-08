@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Utensils, Salad, Fish, Drumstick, Leaf, Sparkles, Zap, Users, ChevronRight, Plus, Eye, Brain, ArrowLeft } from "lucide-react";
+import { Utensils, Salad, Fish, Drumstick, Leaf, Sparkles, Zap, Users, ChevronRight, Plus, Eye, Brain, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { generateRecommendations, type UserPreferences, type TableRecommendation } from "@/lib/recommendationEngine";
 import { type Allergen, type FoodPreference, type HungerLevel, dietaryTagLabels } from "@/data/menuData";
+import FloatingCart from "@/components/menu/FloatingCart";
+import CartSheet from "@/components/menu/CartSheet";
 
 const STEPS = ["welcome", "dietary", "preference", "hunger", "table", "loading", "results"] as const;
 type Step = typeof STEPS[number];
@@ -56,6 +58,8 @@ const SmartMenu = () => {
   const [tableSize, setTableSize] = useState(1);
   const [recommendation, setRecommendation] = useState<TableRecommendation | null>(null);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [addedItemId, setAddedItemId] = useState<string | null>(null);
 
   const goNext = (next: Step) => setStep(next);
 
@@ -77,6 +81,8 @@ const SmartMenu = () => {
 
   const handleAddToOrder = (item: { id: string; name: string; price: number; image: string }) => {
     addItem(item);
+    setAddedItemId(item.id);
+    setTimeout(() => setAddedItemId(null), 1200);
   };
 
   return (
@@ -507,10 +513,14 @@ const SmartMenu = () => {
                           </Button>
                           <Button
                             size="sm"
-                            className="flex-1 gradient-accent text-primary-foreground rounded-xl text-xs h-9"
+                            className={`flex-1 rounded-xl text-xs h-9 ${addedItemId === item.id ? "bg-emerald-600 text-primary-foreground" : "gradient-accent text-primary-foreground"}`}
                             onClick={() => handleAddToOrder({ id: item.id, name: item.name, price: item.price, image: item.image })}
                           >
-                            <Plus className="w-3.5 h-3.5 mr-1" /> Add to order
+                            {addedItemId === item.id ? (
+                              <><Check className="w-3.5 h-3.5 mr-1" /> Added!</>
+                            ) : (
+                              <><Plus className="w-3.5 h-3.5 mr-1" /> Add to order</>
+                            )}
                           </Button>
                         </div>
                       </motion.div>
@@ -540,6 +550,13 @@ const SmartMenu = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {step === "results" && (
+        <>
+          <FloatingCart onClick={() => setCartOpen(true)} />
+          <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} onCheckout={() => navigate("/payment")} />
+        </>
+      )}
     </div>
   );
 };
