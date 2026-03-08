@@ -179,7 +179,7 @@ export const menuItems: MenuItem[] = [
     id: "11", name: "Tuna Tartare",
     description: "Yellowfin tuna, avocado, sesame, crispy wonton chips",
     price: 17.00, image: foodSushi, category: "starters", tags: ["Popular"],
-    allergens: ["seafood", "soy", "sesame", "gluten"], dietaryTags: [], shareable: true,
+    allergens: ["fish", "soy", "sesame", "gluten"], dietaryTags: [], shareable: true,
     type: "starter", preference: ["fish"],
   },
   {
