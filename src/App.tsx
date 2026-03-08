@@ -51,6 +51,7 @@ const App = () => (
 
                   {/* Registration */}
                   <Route path="/register" element={<Register />} />
+                  <Route path="/login" element={<Login />} />
 
                   {/* App User Flow (registered/downloaded app) */}
                   <Route path="/explore" element={<Explore />} />
