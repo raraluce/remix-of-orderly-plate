@@ -20,6 +20,7 @@ import SmartMenu from "./pages/SmartMenu";
 import Explore from "./pages/Explore";
 import MapView from "./pages/MapView";
 import RestaurantView from "./pages/RestaurantView";
+import SmartExplore from "./pages/SmartExplore";
 import RestaurantLayout from "./pages/restaurant/RestaurantLayout";
 import DashboardHome from "./pages/restaurant/DashboardHome";
 import OrdersManagement from "./pages/restaurant/OrdersManagement";
@@ -48,6 +49,7 @@ const App = () => (
 
                   {/* App User Flow (registered/downloaded app) */}
                   <Route path="/explore" element={<Explore />} />
+                  <Route path="/smart-explore" element={<SmartExplore />} />
                   <Route path="/map" element={<MapView />} />
                   <Route path="/restaurant-view/:id" element={<RestaurantView />} />
 

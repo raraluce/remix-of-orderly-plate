@@ -15,6 +15,10 @@ const MapView = () => {
   const pinPositions = [
     { x: 35, y: 40 },
     { x: 62, y: 28 },
+    { x: 25, y: 60 },
+    { x: 70, y: 55 },
+    { x: 48, y: 22 },
+    { x: 20, y: 35 },
   ];
 
   return (
