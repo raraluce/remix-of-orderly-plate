@@ -199,7 +199,7 @@ const SmartMenu = () => {
             </h2>
             <p className="text-muted-foreground text-sm mb-8">Pick one.</p>
             <div className="space-y-3 flex-1">
-              {preferenceOptions.map((opt) => (
+              {preferenceOptions.filter((o) => o.id !== "surprise").map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => {
@@ -218,6 +218,20 @@ const SmartMenu = () => {
                   <span className="font-display font-bold text-base">{opt.label}</span>
                 </button>
               ))}
+
+              <div className="pt-2">
+                <p className="text-xs text-muted-foreground text-center mb-2">Can't decide?</p>
+                <button
+                  onClick={() => {
+                    setPreference("surprise");
+                    goNext("hunger");
+                  }}
+                  className="w-full flex items-center justify-center gap-3 p-5 rounded-2xl border-2 border-primary gradient-accent text-primary-foreground transition-all duration-200 glow-accent-sm"
+                >
+                  <Sparkles className="w-6 h-6" />
+                  <span className="font-display font-bold text-lg">Surprise me!</span>
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
