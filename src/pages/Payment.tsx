@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Users, Percent, Check } from "lucide-react";
+import { ArrowLeft, CreditCard, Users, Percent, Check, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCart } from "@/contexts/CartContext";
 
 const tipOptions = [
@@ -11,6 +12,8 @@ const tipOptions = [
   { label: "20%", value: 0.2 },
 ];
 
+type SplitMode = "equal" | "by-dish";
+
 const Payment = () => {
   const { items, total } = useCart();
   const navigate = useNavigate();
@@ -18,11 +21,25 @@ const Payment = () => {
   const [splitCount, setSplitCount] = useState(1);
   const [processing, setProcessing] = useState(false);
   const [customTip, setCustomTip] = useState("");
+  const [splitMode, setSplitMode] = useState<SplitMode>("equal");
+  const [selectedDishIds, setSelectedDishIds] = useState<string[]>([]);
 
   const serviceFee = total * 0.05;
   const tipAmount = customTip ? parseFloat(customTip) || 0 : total * tipPercent;
   const grandTotal = total + serviceFee + tipAmount;
   const perPerson = grandTotal / splitCount;
+
+  // By-dish calculations
+  const selectedDishTotal = items
+    .filter((i) => selectedDishIds.includes(i.id))
+    .reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const selectedDishShare = selectedDishTotal + selectedDishTotal * 0.05 + (customTip ? (parseFloat(customTip) || 0) * (selectedDishTotal / total) : selectedDishTotal * tipPercent);
+
+  const toggleDish = (id: string) => {
+    setSelectedDishIds((prev) =>
+      prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
+    );
+  };
 
   const handlePay = () => {
     setProcessing(true);
@@ -30,6 +47,10 @@ const Payment = () => {
       navigate("/order-confirmation");
     }, 1800);
   };
+
+  const payAmount = splitMode === "equal"
+    ? (splitCount > 1 ? perPerson : grandTotal)
+    : selectedDishShare;
 
   if (items.length === 0) {
     return (
@@ -121,25 +142,87 @@ const Payment = () => {
             <Users className="w-4 h-4 text-primary" />
             <h2 className="font-display font-semibold text-sm">Split the Bill</h2>
           </div>
-          <div className="flex items-center gap-3">
-            {[1, 2, 3, 4].map((n) => (
-              <button
-                key={n}
-                onClick={() => setSplitCount(n)}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                  splitCount === n
-                    ? "gradient-accent text-primary-foreground glow-accent-sm"
-                    : "bg-secondary text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {n === 1 ? "Just me" : `${n}`}
-              </button>
-            ))}
+
+          {/* Split mode toggle */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setSplitMode("equal")}
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                splitMode === "equal"
+                  ? "gradient-accent text-primary-foreground glow-accent-sm"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" /> Split evenly
+            </button>
+            <button
+              onClick={() => setSplitMode("by-dish")}
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                splitMode === "by-dish"
+                  ? "gradient-accent text-primary-foreground glow-accent-sm"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Receipt className="w-3.5 h-3.5" /> Pay by dish
+            </button>
           </div>
-          {splitCount > 1 && (
-            <p className="text-sm text-muted-foreground text-center">
-              Each person pays <span className="text-primary font-display font-bold">${perPerson.toFixed(2)}</span>
-            </p>
+
+          {splitMode === "equal" && (
+            <>
+              <div className="flex items-center gap-3">
+                {[1, 2, 3, 4].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setSplitCount(n)}
+                    className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      splitCount === n
+                        ? "gradient-accent text-primary-foreground glow-accent-sm"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {n === 1 ? "Just me" : `${n}`}
+                  </button>
+                ))}
+              </div>
+              {splitCount > 1 && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Each person pays <span className="text-primary font-display font-bold">${perPerson.toFixed(2)}</span>
+                </p>
+              )}
+            </>
+          )}
+
+          {splitMode === "by-dish" && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">Select the dishes you're paying for:</p>
+              {items.map((item) => (
+                <label
+                  key={item.id}
+                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer ${
+                    selectedDishIds.includes(item.id)
+                      ? "bg-primary/10 border-primary/30"
+                      : "bg-secondary border-border hover:border-border/80"
+                  }`}
+                >
+                  <Checkbox
+                    checked={selectedDishIds.includes(item.id)}
+                    onCheckedChange={() => toggleDish(item.id)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{item.quantity}× {item.name}</p>
+                  </div>
+                  <span className="text-sm font-display font-bold text-primary shrink-0">
+                    ${(item.price * item.quantity).toFixed(2)}
+                  </span>
+                </label>
+              ))}
+              {selectedDishIds.length > 0 && (
+                <div className="pt-2 border-t border-border flex justify-between text-sm">
+                  <span className="text-muted-foreground">Your dishes + fees</span>
+                  <span className="font-display font-bold text-primary">${selectedDishShare.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -149,10 +232,16 @@ const Payment = () => {
             <span>Total</span>
             <span className="text-gradient">${grandTotal.toFixed(2)}</span>
           </div>
-          {splitCount > 1 && (
+          {splitMode === "equal" && splitCount > 1 && (
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Your share ({splitCount} people)</span>
               <span className="font-semibold text-foreground">${perPerson.toFixed(2)}</span>
+            </div>
+          )}
+          {splitMode === "by-dish" && selectedDishIds.length > 0 && (
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Your dishes ({selectedDishIds.length} items)</span>
+              <span className="font-semibold text-foreground">${selectedDishShare.toFixed(2)}</span>
             </div>
           )}
 
@@ -171,7 +260,7 @@ const Payment = () => {
           <Button
             className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent disabled:opacity-60"
             onClick={handlePay}
-            disabled={processing}
+            disabled={processing || (splitMode === "by-dish" && selectedDishIds.length === 0)}
           >
             {processing ? (
               <span className="flex items-center gap-2">
@@ -180,7 +269,7 @@ const Payment = () => {
               </span>
             ) : (
               <>
-                <CreditCard className="w-5 h-5 mr-2" /> Pay ${splitCount > 1 ? perPerson.toFixed(2) : grandTotal.toFixed(2)}
+                <CreditCard className="w-5 h-5 mr-2" /> Pay ${payAmount.toFixed(2)}
               </>
             )}
           </Button>
