@@ -7,6 +7,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import { TableSessionProvider } from "@/contexts/TableSessionContext";
 import { AppUserProvider } from "@/contexts/AppUserContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import QREntry from "./pages/QREntry";
@@ -41,61 +42,63 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AppUserProvider>
-        <UserPreferencesProvider>
-          <TableSessionProvider>
-            <CartProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  {/* Landing */}
-                  <Route path="/" element={<Index />} />
+        <SettingsProvider>
+          <UserPreferencesProvider>
+            <TableSessionProvider>
+              <CartProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    {/* Landing */}
+                    <Route path="/" element={<Index />} />
 
-                  {/* Registration */}
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                    {/* Registration */}
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                  {/* App User Flow (registered/downloaded app) */}
-                  <Route path="/explore" element={<Explore />} />
-                  <Route path="/smart-explore" element={<SmartExplore />} />
-                  <Route path="/map" element={<MapView />} />
-                  <Route path="/restaurant-view/:id" element={<RestaurantView />} />
+                    {/* App User Flow (registered/downloaded app) */}
+                    <Route path="/explore" element={<Explore />} />
+                    <Route path="/smart-explore" element={<SmartExplore />} />
+                    <Route path="/map" element={<MapView />} />
+                    <Route path="/restaurant-view/:id" element={<RestaurantView />} />
 
-                  {/* Customer Flow (QR-only or app) */}
-                  <Route path="/qr" element={<QREntry />} />
-                  <Route path="/menu" element={<Menu />} />
-                  <Route path="/smart-menu" element={<SmartMenu />} />
-                  <Route path="/table" element={<TableView />} />
-                  <Route path="/order-status" element={<OrderStatus />} />
-                  <Route path="/payment" element={<Payment />} />
-                  <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                  <Route path="/feedback" element={<Feedback />} />
-                  <Route path="/profile" element={<DinerProfile />} />
-                  <Route path="/settings" element={<ProfileSettings />} />
+                    {/* Customer Flow (QR-only or app) */}
+                    <Route path="/qr" element={<QREntry />} />
+                    <Route path="/menu" element={<Menu />} />
+                    <Route path="/smart-menu" element={<SmartMenu />} />
+                    <Route path="/table" element={<TableView />} />
+                    <Route path="/order-status" element={<OrderStatus />} />
+                    <Route path="/payment" element={<Payment />} />
+                    <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                    <Route path="/feedback" element={<Feedback />} />
+                    <Route path="/profile" element={<DinerProfile />} />
+                    <Route path="/settings" element={<ProfileSettings />} />
 
-                  {/* Restaurant Dashboard */}
-                  <Route path="/restaurant" element={<RestaurantLayout />}>
-                    <Route index element={<DashboardHome />} />
-                    <Route path="orders" element={<OrdersManagement />} />
-                    <Route path="menu" element={<MenuManagement />} />
-                    <Route path="tables" element={<TablesQR />} />
-                    <Route path="payments" element={<PaymentsView />} />
-                    <Route path="analytics" element={<AnalyticsDashboard />} />
-                    <Route path="settings" element={<RestaurantSettings />} />
-                  </Route>
+                    {/* Restaurant Dashboard */}
+                    <Route path="/restaurant" element={<RestaurantLayout />}>
+                      <Route index element={<DashboardHome />} />
+                      <Route path="orders" element={<OrdersManagement />} />
+                      <Route path="menu" element={<MenuManagement />} />
+                      <Route path="tables" element={<TablesQR />} />
+                      <Route path="payments" element={<PaymentsView />} />
+                      <Route path="analytics" element={<AnalyticsDashboard />} />
+                      <Route path="settings" element={<RestaurantSettings />} />
+                    </Route>
 
-                  {/* Legacy redirect */}
-                  <Route path="/dashboard" element={<RestaurantLayout />}>
-                    <Route index element={<DashboardHome />} />
-                  </Route>
+                    {/* Legacy redirect */}
+                    <Route path="/dashboard" element={<RestaurantLayout />}>
+                      <Route index element={<DashboardHome />} />
+                    </Route>
 
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </CartProvider>
-          </TableSessionProvider>
-        </UserPreferencesProvider>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </CartProvider>
+            </TableSessionProvider>
+          </UserPreferencesProvider>
+        </SettingsProvider>
       </AppUserProvider>
     </TooltipProvider>
   </QueryClientProvider>
