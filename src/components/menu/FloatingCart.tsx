@@ -13,7 +13,7 @@ const FloatingCart = ({ onClick }: Props) => {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 gradient-accent text-primary-foreground rounded-full px-6 py-3 flex items-center gap-3 shadow-2xl glow-accent animate-slide-up hover:scale-105 transition-transform"
+      className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 gradient-accent text-primary-foreground rounded-full px-6 py-3 flex items-center gap-3 shadow-2xl glow-accent animate-slide-up hover:scale-105 transition-transform"
     >
       <div className="relative">
         <ShoppingBag className="w-5 h-5" />

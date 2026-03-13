@@ -17,7 +17,7 @@ const CartSheet = ({ open, onClose, onCheckout }: Props) => {
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-card border-t border-border rounded-t-3xl animate-slide-up overflow-hidden flex flex-col">
+      <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-card border-t border-border rounded-t-3xl animate-slide-up overflow-hidden flex flex-col pb-20">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <h2 className="font-display font-bold text-lg">Your Order</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-secondary transition-colors">
