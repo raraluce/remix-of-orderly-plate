@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
 /* ── Types ── */
+export interface PaymentMethod {
+  id: string;
+  type: "visa" | "mastercard" | "amex";
+  last4: string;
+  expiry: string;
+  isDefault: boolean;
+}
+
 export interface UserSettings {
   // Account
   name: string;
@@ -23,6 +31,9 @@ export interface UserSettings {
 
   // Language
   language: string;
+
+  // Payment
+  paymentMethods: PaymentMethod[];
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -38,6 +49,10 @@ const DEFAULT_SETTINGS: UserSettings = {
   personalizedAds: false,
   darkMode: true,
   language: "en",
+  paymentMethods: [
+    { id: "pm_1", type: "visa", last4: "4242", expiry: "08/27", isDefault: true },
+    { id: "pm_2", type: "mastercard", last4: "8371", expiry: "03/26", isDefault: false },
+  ],
 };
 
 const STORAGE_KEY = "bite-settings";
@@ -56,6 +71,9 @@ interface SettingsContextType {
   settings: UserSettings;
   updateSettings: (patch: Partial<UserSettings>) => void;
   resetSettings: () => void;
+  addPaymentMethod: (method: Omit<PaymentMethod, "id">) => void;
+  removePaymentMethod: (id: string) => void;
+  setDefaultPaymentMethod: (id: string) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -87,8 +105,37 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setSettings(DEFAULT_SETTINGS);
   }, []);
 
+  const addPaymentMethod = useCallback((method: Omit<PaymentMethod, "id">) => {
+    setSettings((prev) => {
+      const newMethod: PaymentMethod = { ...method, id: `pm_${Date.now()}` };
+      let methods = [...prev.paymentMethods, newMethod];
+      if (newMethod.isDefault) {
+        methods = methods.map((m) => ({ ...m, isDefault: m.id === newMethod.id }));
+      }
+      return { ...prev, paymentMethods: methods };
+    });
+  }, []);
+
+  const removePaymentMethod = useCallback((id: string) => {
+    setSettings((prev) => {
+      const filtered = prev.paymentMethods.filter((m) => m.id !== id);
+      // If we removed the default, make the first one default
+      if (filtered.length > 0 && !filtered.some((m) => m.isDefault)) {
+        filtered[0].isDefault = true;
+      }
+      return { ...prev, paymentMethods: filtered };
+    });
+  }, []);
+
+  const setDefaultPaymentMethod = useCallback((id: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      paymentMethods: prev.paymentMethods.map((m) => ({ ...m, isDefault: m.id === id })),
+    }));
+  }, []);
+
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, resetSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, resetSettings, addPaymentMethod, removePaymentMethod, setDefaultPaymentMethod }}>
       {children}
     </SettingsContext.Provider>
   );
