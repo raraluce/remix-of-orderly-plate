@@ -259,34 +259,130 @@ const PrivacySection = () => {
   );
 };
 
-const PaymentSection = () => (
-  <div className="space-y-4 px-4">
-    <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-      <div className="w-12 h-8 rounded-lg bg-primary/80 flex items-center justify-center text-[10px] font-bold text-primary-foreground">
-        VISA
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">•••• •••• •••• 4242</p>
-        <p className="text-[11px] text-muted-foreground">Expires 08/27</p>
-      </div>
-      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary">Default</span>
-    </div>
+const PaymentSection = () => {
+  const { settings, addPaymentMethod, removePaymentMethod, setDefaultPaymentMethod } = useSettings();
+  const { toast } = useToast();
+  const [showAdd, setShowAdd] = useState(false);
+  const [newLast4, setNewLast4] = useState("");
+  const [newExpiry, setNewExpiry] = useState("");
+  const [newType, setNewType] = useState<"visa" | "mastercard" | "amex">("visa");
 
-    <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-      <div className="w-12 h-8 rounded-lg bg-accent flex items-center justify-center text-[10px] font-bold text-accent-foreground">
-        MC
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">•••• •••• •••• 8371</p>
-        <p className="text-[11px] text-muted-foreground">Expires 03/26</p>
-      </div>
-    </div>
+  const handleAdd = () => {
+    if (newLast4.length !== 4 || !/^\d{4}$/.test(newLast4)) {
+      toast({ title: "Invalid card", description: "Enter the last 4 digits." });
+      return;
+    }
+    if (!/^\d{2}\/\d{2}$/.test(newExpiry)) {
+      toast({ title: "Invalid expiry", description: "Use MM/YY format." });
+      return;
+    }
+    addPaymentMethod({
+      type: newType,
+      last4: newLast4,
+      expiry: newExpiry,
+      isDefault: settings.paymentMethods.length === 0,
+    });
+    setNewLast4("");
+    setNewExpiry("");
+    setShowAdd(false);
+    toast({ title: "Card added", description: `•••• ${newLast4} saved.` });
+  };
 
-    <Button variant="outline" className="w-full h-12 rounded-xl border-dashed border-border text-sm text-muted-foreground">
-      <CreditCard className="w-4 h-4 mr-2" /> Add Payment Method
-    </Button>
-  </div>
-);
+  const typeLabel: Record<string, string> = { visa: "VISA", mastercard: "MC", amex: "AMEX" };
+
+  return (
+    <div className="space-y-4 px-4">
+      {settings.paymentMethods.map((pm) => (
+        <div key={pm.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-12 h-8 rounded-lg bg-primary/80 flex items-center justify-center text-[10px] font-bold text-primary-foreground">
+            {typeLabel[pm.type]}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">•••• •••• •••• {pm.last4}</p>
+            <p className="text-[11px] text-muted-foreground">Expires {pm.expiry}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {pm.isDefault ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary">Default</span>
+            ) : (
+              <button
+                onClick={() => {
+                  setDefaultPaymentMethod(pm.id);
+                  toast({ title: "Default updated" });
+                }}
+                className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Set default
+              </button>
+            )}
+            <button
+              onClick={() => {
+                removePaymentMethod(pm.id);
+                toast({ title: "Card removed" });
+              }}
+              className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-destructive" />
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {settings.paymentMethods.length === 0 && (
+        <p className="text-center text-sm text-muted-foreground py-6">No payment methods saved</p>
+      )}
+
+      {showAdd ? (
+        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Card</p>
+          <div className="grid grid-cols-3 gap-2">
+            {(["visa", "mastercard", "amex"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setNewType(t)}
+                className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                  newType === t ? "gradient-accent text-primary-foreground glow-accent-sm" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {typeLabel[t]}
+              </button>
+            ))}
+          </div>
+          <Input
+            placeholder="Last 4 digits"
+            value={newLast4}
+            onChange={(e) => setNewLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            maxLength={4}
+            className="h-11 rounded-xl bg-secondary border-border"
+          />
+          <Input
+            placeholder="MM/YY"
+            value={newExpiry}
+            onChange={(e) => {
+              let v = e.target.value.replace(/[^\d/]/g, "");
+              if (v.length === 2 && !v.includes("/") && newExpiry.length < v.length) v += "/";
+              setNewExpiry(v.slice(0, 5));
+            }}
+            maxLength={5}
+            className="h-11 rounded-xl bg-secondary border-border"
+          />
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => setShowAdd(false)}>Cancel</Button>
+            <Button className="flex-1 h-11 rounded-xl gradient-accent text-primary-foreground font-bold" onClick={handleAdd}>Add Card</Button>
+          </div>
+        </div>
+      ) : (
+        <Button
+          variant="outline"
+          className="w-full h-12 rounded-xl border-dashed border-border text-sm text-muted-foreground"
+          onClick={() => setShowAdd(true)}
+        >
+          <CreditCard className="w-4 h-4 mr-2" /> Add Payment Method
+        </Button>
+      )}
+    </div>
+  );
+};
 
 const AppearanceSection = () => {
   const { settings, updateSettings } = useSettings();

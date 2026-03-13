@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Users, Percent, Check, Receipt } from "lucide-react";
+import { ArrowLeft, CreditCard, Users, Percent, Check, Receipt, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const tipOptions = [
   { label: "No tip", value: 0 },
@@ -12,10 +14,15 @@ const tipOptions = [
   { label: "20%", value: 0.2 },
 ];
 
+const DISCOUNT_CODES: Record<string, { label: string; percent: number }> = {
+  BITE20: { label: "BITE20 — 20% off", percent: 0.2 },
+};
+
 type SplitMode = "equal" | "by-dish";
 
 const Payment = () => {
   const { items, total } = useCart();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [tipPercent, setTipPercent] = useState(0.15);
   const [splitCount, setSplitCount] = useState(1);
@@ -24,16 +31,36 @@ const Payment = () => {
   const [splitMode, setSplitMode] = useState<SplitMode>("equal");
   const [selectedDishIds, setSelectedDishIds] = useState<string[]>([]);
 
-  const serviceFee = total * 0.05;
-  const tipAmount = customTip ? parseFloat(customTip) || 0 : total * tipPercent;
-  const grandTotal = total + serviceFee + tipAmount;
+  // Discount
+  const [discountInput, setDiscountInput] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; label: string; percent: number } | null>(null);
+  const [discountError, setDiscountError] = useState("");
+
+  const handleApplyDiscount = () => {
+    const code = discountInput.trim().toUpperCase();
+    const match = DISCOUNT_CODES[code];
+    if (match) {
+      setAppliedDiscount({ code, ...match });
+      setDiscountError("");
+      setDiscountInput("");
+    } else {
+      setDiscountError("Invalid discount code");
+    }
+  };
+
+  const discountAmount = appliedDiscount ? total * appliedDiscount.percent : 0;
+  const discountedTotal = total - discountAmount;
+  const serviceFee = discountedTotal * 0.05;
+  const tipAmount = customTip ? parseFloat(customTip) || 0 : discountedTotal * tipPercent;
+  const grandTotal = discountedTotal + serviceFee + tipAmount;
   const perPerson = grandTotal / splitCount;
 
   // By-dish calculations
   const selectedDishTotal = items
     .filter((i) => selectedDishIds.includes(i.id))
     .reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const selectedDishShare = selectedDishTotal + selectedDishTotal * 0.05 + (customTip ? (parseFloat(customTip) || 0) * (selectedDishTotal / total) : selectedDishTotal * tipPercent);
+  const selectedAfterDiscount = appliedDiscount ? selectedDishTotal * (1 - appliedDiscount.percent) : selectedDishTotal;
+  const selectedDishShare = selectedAfterDiscount + selectedAfterDiscount * 0.05 + (customTip ? (parseFloat(customTip) || 0) * (selectedAfterDiscount / (discountedTotal || 1)) : selectedAfterDiscount * tipPercent);
 
   const toggleDish = (id: string) => {
     setSelectedDishIds((prev) =>
@@ -51,6 +78,9 @@ const Payment = () => {
   const payAmount = splitMode === "equal"
     ? (splitCount > 1 ? perPerson : grandTotal)
     : selectedDishShare;
+
+  const defaultCard = settings.paymentMethods.find((m) => m.isDefault);
+  const typeLabel: Record<string, string> = { visa: "Visa", mastercard: "Mastercard", amex: "Amex" };
 
   if (items.length === 0) {
     return (
@@ -90,10 +120,48 @@ const Payment = () => {
             <span className="text-muted-foreground">Subtotal</span>
             <span className="font-semibold">${total.toFixed(2)}</span>
           </div>
+          {appliedDiscount && (
+            <div className="flex justify-between text-sm">
+              <span className="text-emerald-500">Discount ({appliedDiscount.code})</span>
+              <span className="font-semibold text-emerald-500">−${discountAmount.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Service fee</span>
             <span className="font-semibold">${serviceFee.toFixed(2)}</span>
           </div>
+        </div>
+
+        {/* Discount Code */}
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-3 animate-fade-up" style={{ animationDelay: "0.05s" }}>
+          <div className="flex items-center gap-2">
+            <Tag className="w-4 h-4 text-primary" />
+            <h2 className="font-display font-semibold text-sm">Discount Code</h2>
+          </div>
+          {appliedDiscount ? (
+            <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm font-semibold text-emerald-500">{appliedDiscount.label}</span>
+              </div>
+              <button onClick={() => setAppliedDiscount(null)} className="p-1 rounded-full hover:bg-secondary transition-colors">
+                <X className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter code"
+                value={discountInput}
+                onChange={(e) => { setDiscountInput(e.target.value.toUpperCase()); setDiscountError(""); }}
+                className="flex-1 h-11 rounded-xl bg-secondary border-border uppercase"
+              />
+              <Button onClick={handleApplyDiscount} variant="outline" className="h-11 rounded-xl px-5 font-semibold">
+                Apply
+              </Button>
+            </div>
+          )}
+          {discountError && <p className="text-xs text-destructive">{discountError}</p>}
         </div>
 
         {/* Tip Selection */}
@@ -143,7 +211,6 @@ const Payment = () => {
             <h2 className="font-display font-semibold text-sm">Split the Bill</h2>
           </div>
 
-          {/* Split mode toggle */}
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setSplitMode("equal")}
@@ -245,14 +312,14 @@ const Payment = () => {
             </div>
           )}
 
-          {/* Simulated card */}
+          {/* Selected payment card */}
           <div className="bg-secondary rounded-xl p-4 flex items-center gap-3">
             <div className="w-10 h-7 rounded bg-gradient-to-br from-primary to-amber-500 flex items-center justify-center">
               <CreditCard className="w-4 h-4 text-primary-foreground" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold">•••• •••• •••• 4242</p>
-              <p className="text-[11px] text-muted-foreground">Visa</p>
+              <p className="text-sm font-semibold">•••• •••• •••• {defaultCard?.last4 ?? "4242"}</p>
+              <p className="text-[11px] text-muted-foreground">{defaultCard ? typeLabel[defaultCard.type] ?? "Card" : "Visa"}</p>
             </div>
             <Check className="w-4 h-4 text-emerald-400" />
           </div>
