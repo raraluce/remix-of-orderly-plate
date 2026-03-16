@@ -50,7 +50,11 @@ const Menu = () => {
 
   const handleCheckout = () => {
     setCartOpen(false);
-    navigate("/payment");
+    if (config.paymentModel === "pay-later") {
+      navigate("/order-confirmation");
+    } else {
+      navigate("/payment");
+    }
   };
 
   const handleSearch = (q: string) => {
