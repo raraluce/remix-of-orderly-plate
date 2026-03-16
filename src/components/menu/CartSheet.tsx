@@ -139,8 +139,17 @@ const CartSheet = ({ open, onClose, onCheckout }: Props) => {
               className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent"
               onClick={onCheckout}
             >
-              <CreditCard className="w-5 h-5 mr-2" /> Continue to Payment
+              {isPayLater ? (
+                <><Send className="w-5 h-5 mr-2" /> Send Order to Kitchen</>
+              ) : (
+                <><CreditCard className="w-5 h-5 mr-2" /> Continue to Payment</>
+              )}
             </Button>
+            {isPayLater && (
+              <p className="text-[11px] text-center text-muted-foreground">
+                You'll pay at the end of your meal
+              </p>
+            )}
           </div>
         )}
       </div>
