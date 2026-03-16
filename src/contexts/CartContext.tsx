@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { PairingTag, FoodPreference } from "@/data/menuData";
 
+export interface CartCustomisations {
+  removedIngredients: string[];
+  addedExtras: string[];
+  cookingPoint: string | null;
+  priceAdjustment: number;
+}
+
 export interface CartItem {
   id: string;
   name: string;
@@ -12,6 +19,7 @@ export interface CartItem {
   category?: string;
   type?: string;
   preference?: FoodPreference[];
+  customisations?: CartCustomisations;
 }
 
 interface CartContextType {
