@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Save, Clock, Palette, Sparkles, Globe } from "lucide-react";
+import { Save, Clock, Palette, Sparkles, Globe, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { mockRestaurant } from "@/services/mockData";
+import { useRestaurantConfig, type PaymentModel } from "@/contexts/RestaurantConfigContext";
 
 const RestaurantSettings = () => {
   const [name, setName] = useState(mockRestaurant.name);
