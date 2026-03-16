@@ -15,7 +15,9 @@ interface Props {
 
 const CartSheet = ({ open, onClose, onCheckout }: Props) => {
   const { items, updateQuantity, removeItem, total } = useCart();
+  const { config } = useRestaurantConfig();
   const [customiseItemId, setCustomiseItemId] = useState<string | null>(null);
+  const isPayLater = config.paymentModel === "pay-later";
 
   if (!open) return null;
 
