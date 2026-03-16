@@ -110,12 +110,30 @@ const Payment = () => {
         {/* Order Summary */}
         <div className="bg-card border border-border rounded-2xl p-5 space-y-3 animate-fade-up">
           <h2 className="font-display font-semibold text-sm text-muted-foreground uppercase tracking-wider">Order Summary</h2>
-          {items.map((item) => (
-            <div key={item.id} className="flex justify-between text-sm">
-              <span>{item.quantity}× {item.name}</span>
-              <span className="font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+          {items.map((item) => {
+            const unitPrice = item.price + (item.customisations?.priceAdjustment ?? 0);
+            return (
+            <div key={item.id} className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>{item.quantity}× {item.name}</span>
+                <span className="font-semibold">${(unitPrice * item.quantity).toFixed(2)}</span>
+              </div>
+              {item.customisations && (
+                <div className="text-[11px] text-muted-foreground pl-4 space-y-0.5">
+                  {item.customisations.removedIngredients.length > 0 && (
+                    <p>− {item.customisations.removedIngredients.join(", ")}</p>
+                  )}
+                  {item.customisations.addedExtras.length > 0 && (
+                    <p>+ {item.customisations.addedExtras.join(", ")}</p>
+                  )}
+                  {item.customisations.cookingPoint && (
+                    <p>🔥 {item.customisations.cookingPoint}</p>
+                  )}
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
           <div className="border-t border-border pt-3 flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
             <span className="font-semibold">${total.toFixed(2)}</span>
