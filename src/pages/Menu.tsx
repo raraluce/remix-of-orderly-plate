@@ -25,6 +25,7 @@ const Menu = () => {
   const { clearCart } = useCart();
   const { allergenKeys, allergens } = useUserPreferences();
   const { session, tableNumber } = useTableSession();
+  const { config } = useRestaurantConfig();
 
   const isCompatible = (item: typeof menuItems[0]) => {
     return !item.allergens.some((a) => allergenKeys.includes(a));
