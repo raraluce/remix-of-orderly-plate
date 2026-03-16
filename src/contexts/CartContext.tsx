@@ -67,9 +67,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setItems((prev) => prev.map((i) => i.id === id ? { ...i, quantity } : i));
   };
 
+  const updateCustomisations = (id: string, customisations: CartCustomisations) => {
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, customisations } : i))
+    );
+  };
+
   const clearCart = () => setItems([]);
 
-  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const total = items.reduce(
+    (sum, i) => sum + (i.price + (i.customisations?.priceAdjustment ?? 0)) * i.quantity,
+    0
+  );
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
