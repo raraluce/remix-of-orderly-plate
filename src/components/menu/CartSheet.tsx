@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { X, Minus, Plus, CreditCard, ChefHat } from "lucide-react";
+import { X, Minus, Plus, CreditCard, ChefHat, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import PairingSuggestions from "@/components/menu/PairingSuggestions";
 import CustomiseSheet from "@/components/menu/CustomiseSheet";
 import { dishCustomisations } from "@/data/dishCustomizations";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 
 interface Props {
   open: boolean;
@@ -14,7 +15,9 @@ interface Props {
 
 const CartSheet = ({ open, onClose, onCheckout }: Props) => {
   const { items, updateQuantity, removeItem, total } = useCart();
+  const { config } = useRestaurantConfig();
   const [customiseItemId, setCustomiseItemId] = useState<string | null>(null);
+  const isPayLater = config.paymentModel === "pay-later";
 
   if (!open) return null;
 
@@ -136,8 +139,17 @@ const CartSheet = ({ open, onClose, onCheckout }: Props) => {
               className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent"
               onClick={onCheckout}
             >
-              <CreditCard className="w-5 h-5 mr-2" /> Continue to Payment
+              {isPayLater ? (
+                <><Send className="w-5 h-5 mr-2" /> Send Order to Kitchen</>
+              ) : (
+                <><CreditCard className="w-5 h-5 mr-2" /> Continue to Payment</>
+              )}
             </Button>
+            {isPayLater && (
+              <p className="text-[11px] text-center text-muted-foreground">
+                You'll pay at the end of your meal
+              </p>
+            )}
           </div>
         )}
       </div>

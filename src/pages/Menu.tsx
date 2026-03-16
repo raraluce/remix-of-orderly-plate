@@ -12,6 +12,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useTableSession } from "@/contexts/TableSessionContext";
 import { Switch } from "@/components/ui/switch";
 import { analyticsService } from "@/services/analyticsService";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 import heroFood from "@/assets/hero-food.jpg";
 
 const Menu = () => {
@@ -24,6 +25,7 @@ const Menu = () => {
   const { clearCart } = useCart();
   const { allergenKeys, allergens } = useUserPreferences();
   const { session, tableNumber } = useTableSession();
+  const { config } = useRestaurantConfig();
 
   const isCompatible = (item: typeof menuItems[0]) => {
     return !item.allergens.some((a) => allergenKeys.includes(a));
@@ -48,7 +50,11 @@ const Menu = () => {
 
   const handleCheckout = () => {
     setCartOpen(false);
-    navigate("/payment");
+    if (config.paymentModel === "pay-later") {
+      navigate("/order-confirmation");
+    } else {
+      navigate("/payment");
+    }
   };
 
   const handleSearch = (q: string) => {

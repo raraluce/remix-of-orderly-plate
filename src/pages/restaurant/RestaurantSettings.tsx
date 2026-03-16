@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Save, Clock, Palette, Sparkles, Globe } from "lucide-react";
+import { Save, Clock, Palette, Sparkles, Globe, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { mockRestaurant } from "@/services/mockData";
+import { useRestaurantConfig, type PaymentModel } from "@/contexts/RestaurantConfigContext";
 
 const RestaurantSettings = () => {
   const [name, setName] = useState(mockRestaurant.name);
@@ -13,6 +14,7 @@ const RestaurantSettings = () => {
   const [serviceFee, setServiceFee] = useState(String(mockRestaurant.serviceFeePercent));
   const [aiEnabled, setAiEnabled] = useState(true);
   const [saved, setSaved] = useState(false);
+  const { config, updateConfig } = useRestaurantConfig();
 
   const handleSave = () => {
     setSaved(true);
@@ -80,7 +82,47 @@ const RestaurantSettings = () => {
         </div>
       </div>
 
-      {/* AI Features */}
+      {/* Payment Model */}
+      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <CreditCard className="w-4 h-4 text-primary" />
+          <h2 className="font-display font-semibold">Payment Model</h2>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Choose when your guests pay for their orders.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            {
+              value: "pay-now" as PaymentModel,
+              title: "Pay Now",
+              desc: "Guests pay at checkout before the order is sent to the kitchen.",
+            },
+            {
+              value: "pay-later" as PaymentModel,
+              title: "Pay Later",
+              desc: "Guests order first and settle the bill at the end of the meal.",
+            },
+          ]).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => updateConfig({ paymentModel: opt.value })}
+              className={`p-4 rounded-xl text-left border transition-all duration-200 ${
+                config.paymentModel === opt.value
+                  ? "gradient-accent text-primary-foreground border-transparent glow-accent-sm"
+                  : "bg-secondary border-border text-foreground hover:border-border/80"
+              }`}
+            >
+              <p className="text-sm font-semibold">{opt.title}</p>
+              <p className={`text-[11px] mt-1 ${
+                config.paymentModel === opt.value ? "text-primary-foreground/70" : "text-muted-foreground"
+              }`}>
+                {opt.desc}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-4 h-4 text-primary" />
