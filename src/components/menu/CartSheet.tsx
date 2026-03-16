@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { X, Minus, Plus, CreditCard, ChefHat } from "lucide-react";
+import { X, Minus, Plus, CreditCard, ChefHat, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import PairingSuggestions from "@/components/menu/PairingSuggestions";
 import CustomiseSheet from "@/components/menu/CustomiseSheet";
 import { dishCustomisations } from "@/data/dishCustomizations";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 
 interface Props {
   open: boolean;
