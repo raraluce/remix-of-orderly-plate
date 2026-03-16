@@ -12,6 +12,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useTableSession } from "@/contexts/TableSessionContext";
 import { Switch } from "@/components/ui/switch";
 import { analyticsService } from "@/services/analyticsService";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 import heroFood from "@/assets/hero-food.jpg";
 
 const Menu = () => {
