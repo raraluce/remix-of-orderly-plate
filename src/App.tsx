@@ -8,6 +8,7 @@ import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import { TableSessionProvider } from "@/contexts/TableSessionContext";
 import { AppUserProvider } from "@/contexts/AppUserContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { RestaurantConfigProvider } from "@/contexts/RestaurantConfigContext";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import QREntry from "./pages/QREntry";
