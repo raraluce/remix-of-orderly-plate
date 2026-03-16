@@ -15,7 +15,6 @@ const RestaurantSettings = () => {
   const [aiEnabled, setAiEnabled] = useState(true);
   const [saved, setSaved] = useState(false);
   const { config, updateConfig } = useRestaurantConfig();
-  const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
     setSaved(true);
