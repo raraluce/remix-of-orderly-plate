@@ -14,6 +14,8 @@ const RestaurantSettings = () => {
   const [serviceFee, setServiceFee] = useState(String(mockRestaurant.serviceFeePercent));
   const [aiEnabled, setAiEnabled] = useState(true);
   const [saved, setSaved] = useState(false);
+  const { config, updateConfig } = useRestaurantConfig();
+  const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
     setSaved(true);
