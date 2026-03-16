@@ -101,6 +101,7 @@ const App = () => (
             </TableSessionProvider>
           </UserPreferencesProvider>
         </SettingsProvider>
+        </RestaurantConfigProvider>
       </AppUserProvider>
     </TooltipProvider>
   </QueryClientProvider>
