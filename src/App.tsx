@@ -105,6 +105,7 @@ const App = () => (
         </SettingsProvider>
         </RestaurantConfigProvider>
       </AppUserProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
