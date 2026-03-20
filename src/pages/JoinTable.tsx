@@ -75,10 +75,10 @@ const JoinTable = () => {
         }
 
         // 5) Find an existing active session or create one
-        let session = await sessionService.findActiveSession(tableId);
-        if (!session) {
-          session = await sessionService.createSession(tableId, restaurant.id);
-        }
+        const existingSession = await sessionService.findActiveSession(tableId);
+        const sessionId = existingSession
+          ? existingSession.id
+          : (await sessionService.createSession(tableId, restaurant.id)).id;
 
         // 6) Check if user is already a participant
         const participants = await sessionService.getParticipants(session.id);
