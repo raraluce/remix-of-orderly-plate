@@ -81,11 +81,10 @@ const JoinTable = () => {
           : (await sessionService.createSession(tableId, restaurant.id)).id;
 
         // 6) Check if user is already a participant
-        const participants = await sessionService.getParticipants(session.id);
+        const participants = await sessionService.getParticipants(sessionId);
         const alreadyJoined = participants.some((p) => p.user_id === currentUser!.id);
 
         if (!alreadyJoined) {
-          // Get display name from profile or default to "Guest"
           const { data: profile } = await supabase
             .from("profiles")
             .select("display_name")
@@ -93,11 +92,11 @@ const JoinTable = () => {
             .single();
 
           const displayName = profile?.display_name || "Guest";
-          await sessionService.joinSession(session.id, displayName, currentUser.id);
+          await sessionService.joinSession(sessionId, displayName, currentUser.id);
         }
 
         // 7) Redirect to menu with session context
-        navigate(`/menu?session=${session.id}&restaurant=${restaurant.id}&table=${table.label}`, {
+        navigate(`/menu?session=${sessionId}&restaurant=${restaurant.id}&table=${table.label}`, {
           replace: true,
         });
       } catch (err: any) {
