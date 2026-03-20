@@ -58,8 +58,8 @@ const Menu = () => {
   const isLoading = restLoading || catsLoading || dishesLoading;
 
   const isCompatible = (dish: DishWithDetails) => {
-    const dishAllergenIds = dish.allergens?.map((a) => a.allergen_id) ?? [];
-    return !dishAllergenIds.some((id) => allergenKeys.includes(id));
+    const dishAllergenNames = dish.allergens?.map((a) => a.allergen?.name?.toLowerCase()) ?? [];
+    return !dishAllergenNames.some((name) => allergenKeys.some((k) => k === name));
   };
 
   // Search filter
