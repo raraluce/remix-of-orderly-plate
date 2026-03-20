@@ -23,6 +23,7 @@ import SmartMenu from "./pages/SmartMenu";
 import Explore from "./pages/Explore";
 import MapView from "./pages/MapView";
 import RestaurantView from "./pages/RestaurantView";
+import JoinTable from "./pages/JoinTable";
 import SmartExplore from "./pages/SmartExplore";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -70,6 +71,7 @@ const App = () => (
 
                     {/* Customer Flow (QR-only or app) */}
                     <Route path="/qr" element={<QREntry />} />
+                    <Route path="/join/:restaurantSlug/:tableId" element={<JoinTable />} />
                     <Route path="/menu" element={<Menu />} />
                     <Route path="/smart-menu" element={<SmartMenu />} />
                     <Route path="/table" element={<TableView />} />
