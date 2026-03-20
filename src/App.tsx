@@ -23,6 +23,7 @@ import SmartMenu from "./pages/SmartMenu";
 import Explore from "./pages/Explore";
 import MapView from "./pages/MapView";
 import RestaurantView from "./pages/RestaurantView";
+import JoinTable from "./pages/JoinTable";
 import SmartExplore from "./pages/SmartExplore";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
