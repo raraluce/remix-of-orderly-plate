@@ -1,22 +1,42 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Star, Clock, Sparkles, User, ShieldCheck, Search, X, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import MenuCard from "@/components/menu/MenuCard";
+import SupabaseMenuCard from "@/components/menu/SupabaseMenuCard";
+import MenuCardSkeleton from "@/components/menu/MenuCardSkeleton";
 import CategoryNav from "@/components/menu/CategoryNav";
 import FloatingCart from "@/components/menu/FloatingCart";
 import CartSheet from "@/components/menu/CartSheet";
-import { menuItems } from "@/data/menuData";
 import { useCart } from "@/contexts/CartContext";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useTableSession } from "@/contexts/TableSessionContext";
 import { Switch } from "@/components/ui/switch";
 import { analyticsService } from "@/services/analyticsService";
 import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
+import { useMenuCategories, useMenuDishes, type DishWithDetails } from "@/hooks/useMenu";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import heroFood from "@/assets/hero-food.jpg";
 
+/** Fetch the first active restaurant as a fallback */
+function useDefaultRestaurant() {
+  return useQuery({
+    queryKey: ["default-restaurant"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("*")
+        .eq("status", "active")
+        .limit(1)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 const Menu = () => {
-  const [category, setCategory] = useState("popular");
+  const [category, setCategory] = useState("all");
   const [cartOpen, setCartOpen] = useState(false);
   const [personalizedMode, setPersonalizedMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,24 +47,39 @@ const Menu = () => {
   const { session, tableNumber } = useTableSession();
   const { config } = useRestaurantConfig();
 
-  const isCompatible = (item: typeof menuItems[0]) => {
-    return !item.allergens.some((a) => allergenKeys.includes(a));
+  // Get restaurant
+  const { data: restaurant, isLoading: restLoading } = useDefaultRestaurant();
+  const restaurantId = restaurant?.id;
+
+  // Fetch categories & dishes from Supabase
+  const { data: categories = [], isLoading: catsLoading } = useMenuCategories(restaurantId);
+  const { data: dishes = [], isLoading: dishesLoading } = useMenuDishes(restaurantId);
+
+  const isLoading = restLoading || catsLoading || dishesLoading;
+
+  const isCompatible = (dish: DishWithDetails) => {
+    const dishAllergenNames = dish.allergens?.map((a) => a.allergen?.name?.toLowerCase()) ?? [];
+    return !dishAllergenNames.some((name) => allergenKeys.some((k) => k === name));
   };
 
   // Search filter
-  const searchFiltered = searchQuery.trim()
-    ? menuItems.filter((i) =>
-        i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        i.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        i.dietaryTags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : null;
+  const searchFiltered = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const q = searchQuery.toLowerCase();
+    return dishes.filter(
+      (d) =>
+        d.name.toLowerCase().includes(q) ||
+        (d.description?.toLowerCase().includes(q)) ||
+        d.diet_tags?.some((t) => t.diet_type.toLowerCase().includes(q))
+    );
+  }, [dishes, searchQuery]);
 
-  const baseFiltered = searchFiltered
-    ? searchFiltered
-    : category === "popular"
-    ? menuItems.filter((i) => i.tags?.some((t) => ["Chef's Pick", "Popular", "New", "Must Try"].includes(t)))
-    : menuItems.filter((i) => i.category === category);
+  // Category filter
+  const baseFiltered = useMemo(() => {
+    if (searchFiltered) return searchFiltered;
+    if (category === "all") return dishes;
+    return dishes.filter((d) => d.category_id === category);
+  }, [searchFiltered, category, dishes]);
 
   const filtered = personalizedMode ? baseFiltered.filter(isCompatible) : baseFiltered;
 
@@ -64,16 +99,23 @@ const Menu = () => {
     }
   };
 
-  const recommended = menuItems
-    .filter((i) => i.tags?.some((t) => ["Chef's Pick", "Must Try", "Popular"].includes(t)))
-    .filter((i) => !personalizedMode || isCompatible(i))
-    .slice(0, 3);
+  // Featured recommendations
+  const recommended = useMemo(
+    () =>
+      dishes
+        .filter((d) => d.is_featured)
+        .filter((d) => !personalizedMode || isCompatible(d))
+        .slice(0, 3),
+    [dishes, personalizedMode, allergenKeys]
+  );
+
+  const categoryItems = categories.map((c) => ({ id: c.id, name: c.name }));
 
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Restaurant Header */}
       <div className="relative h-48 overflow-hidden">
-        <img src={heroFood} alt="Restaurant" className="w-full h-full object-cover" />
+        <img src={restaurant?.cover_url || heroFood} alt="Restaurant" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <Link to={session ? "/table" : "/"} className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
           <ArrowLeft className="w-5 h-5" />
@@ -95,7 +137,7 @@ const Menu = () => {
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-display font-bold mb-1">The Grand Kitchen</h1>
+              <h1 className="text-2xl font-display font-bold mb-1">{restaurant?.name ?? "Menu"}</h1>
               {session && (
                 <div className="flex items-center gap-1.5 mb-1">
                   <Users className="w-3.5 h-3.5 text-primary" />
@@ -108,11 +150,12 @@ const Menu = () => {
               Smart Menu
             </Link>
           </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><Star className="w-4 h-4 text-primary fill-primary" /> 4.8</span>
-            <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> 20-30 min</span>
-            <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> 0.3 mi</span>
-          </div>
+          {restaurant && (
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              {restaurant.address && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {restaurant.address}</span>}
+              {restaurant.phone && <span className="flex items-center gap-1">{restaurant.phone}</span>}
+            </div>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -136,10 +179,7 @@ const Menu = () => {
                   autoFocus
                 />
                 {searchQuery && (
-                  <button
-                    onClick={() => { setSearchQuery(""); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                  >
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
@@ -182,7 +222,7 @@ const Menu = () => {
 
         {!searchQuery && (
           <div className="mb-6 sticky top-0 z-20 bg-background py-3">
-            <CategoryNav active={category} onChange={setCategory} />
+            <CategoryNav active={category} onChange={setCategory} categories={categoryItems} />
           </div>
         )}
 
@@ -192,25 +232,29 @@ const Menu = () => {
           </p>
         )}
 
-        {/* Recommendations */}
-        {!searchQuery && category === "popular" && recommended.length > 0 && (
+        {/* Featured recommendations */}
+        {!searchQuery && category === "all" && recommended.length > 0 && !isLoading && (
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-primary" />
               <h2 className="font-display font-semibold text-sm">Recommended for You</h2>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-              {recommended.map((item) => (
-                <div key={`rec-${item.id}`} className="w-[200px] flex-shrink-0 bg-card border border-primary/20 rounded-2xl overflow-hidden hover-lift">
+              {recommended.map((dish) => (
+                <div key={`rec-${dish.id}`} className="w-[200px] flex-shrink-0 bg-card border border-primary/20 rounded-2xl overflow-hidden hover-lift">
                   <div className="h-28 w-full overflow-hidden">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    {dish.image_url ? (
+                      <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-muted" />
+                    )}
                   </div>
                   <div className="p-3">
-                    <h4 className="font-semibold text-xs truncate">{item.name}</h4>
+                    <h4 className="font-semibold text-xs truncate">{dish.name}</h4>
                     <div className="flex justify-between items-center mt-1">
-                      <span className="text-primary font-display font-bold text-xs">${item.price.toFixed(2)}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full gradient-accent text-primary-foreground font-bold uppercase truncate max-w-[80px]">
-                        {item.tags?.[0]}
+                      <span className="text-primary font-display font-bold text-xs">€{Number(dish.price).toFixed(2)}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full gradient-accent text-primary-foreground font-bold uppercase">
+                        Featured
                       </span>
                     </div>
                   </div>
@@ -220,37 +264,47 @@ const Menu = () => {
           </div>
         )}
 
-        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((item) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.25 }}
-              >
-                <MenuCard item={item} />
-              </motion.div>
+        {/* Loading skeletons */}
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <MenuCardSkeleton key={i} />
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+        )}
 
-        <AnimatePresence>
-          {filtered.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-16"
-            >
-              <p className="text-muted-foreground text-sm">
-                {searchQuery ? `No dishes found for "${searchQuery}"` : "No dishes match your filters in this category."}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Menu items */}
+        {!isLoading && (
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((dish) => (
+                <motion.div
+                  key={dish.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <SupabaseMenuCard dish={dish} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && filtered.length === 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+            <p className="text-muted-foreground text-sm">
+              {searchQuery
+                ? `No dishes found for "${searchQuery}"`
+                : dishes.length === 0
+                ? "No dishes available yet. Check back soon!"
+                : "No dishes match your filters in this category."}
+            </p>
+          </motion.div>
+        )}
       </div>
 
       <FloatingCart onClick={() => setCartOpen(true)} />
