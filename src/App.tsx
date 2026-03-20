@@ -71,6 +71,7 @@ const App = () => (
 
                     {/* Customer Flow (QR-only or app) */}
                     <Route path="/qr" element={<QREntry />} />
+                    <Route path="/join/:restaurantSlug/:tableId" element={<JoinTable />} />
                     <Route path="/menu" element={<Menu />} />
                     <Route path="/smart-menu" element={<SmartMenu />} />
                     <Route path="/table" element={<TableView />} />
