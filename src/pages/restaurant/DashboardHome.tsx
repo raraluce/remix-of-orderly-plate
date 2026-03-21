@@ -109,6 +109,7 @@ const DashboardHome = () => {
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default DashboardHome;

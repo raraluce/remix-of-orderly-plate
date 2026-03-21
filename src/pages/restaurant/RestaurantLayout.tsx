@@ -109,12 +109,12 @@ const RestaurantLayout = () => {
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-primary-foreground">
-            OW
+            {initials}
           </div>
           {!collapsed && (
             <div>
-              <p className="text-xs font-semibold">The Grand Kitchen</p>
-              <p className="text-[10px] text-muted-foreground">Owner</p>
+              <p className="text-xs font-semibold">{restaurantName}</p>
+              <p className="text-[10px] text-muted-foreground capitalize">{restaurant?.status ?? "—"}</p>
             </div>
           )}
         </div>
