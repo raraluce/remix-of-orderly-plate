@@ -22,12 +22,14 @@ const statusColors: Record<string, string> = {
   paid: "bg-secondary text-muted-foreground",
 };
 
-const DashboardHome = () => (
+const DashboardHome = () => {
+  const { restaurant } = useRestaurantConfig();
+  return (
   <div className="p-6 space-y-6">
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-2xl font-display font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">The Grand Kitchen · Today</p>
+        <p className="text-sm text-muted-foreground">{restaurant?.name ?? "Restaurant"} · Today</p>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
