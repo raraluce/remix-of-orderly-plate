@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import {
   LayoutDashboard, UtensilsCrossed, ShoppingBag, QrCode,
-  CreditCard, BarChart3, Settings, ChevronLeft, ChevronRight, Menu
+  CreditCard, BarChart3, Settings, ChevronLeft, ChevronRight, Menu,
+  Store, Loader2
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 
 const navItems = [
   { path: "/restaurant", label: "Dashboard", icon: LayoutDashboard },
@@ -17,8 +20,48 @@ const navItems = [
 
 const RestaurantLayout = () => {
   const location = useLocation();
+  const { user, loading: authLoading } = useAuth();
+  const { restaurant, loading: restaurantLoading, noRestaurant } = useRestaurantConfig();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Auth gate
+  if (authLoading || restaurantLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading dashboard…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (noRestaurant) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+            <Store className="w-8 h-8 text-primary" />
+          </div>
+          <h1 className="text-2xl font-display font-bold">No restaurant found</h1>
+          <p className="text-muted-foreground text-sm">
+            Your account isn't linked to a restaurant yet. Ask a restaurant owner to add you as a team member, or create a new restaurant to get started.
+          </p>
+          <Link to="/" className="inline-block text-sm text-primary font-semibold hover:underline">
+            ← Back to home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const restaurantName = restaurant?.name ?? "Restaurant";
+  const initials = restaurantName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
   const isActive = (path: string) => {
     if (path === "/restaurant") return location.pathname === "/restaurant";
@@ -66,12 +109,12 @@ const RestaurantLayout = () => {
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-primary-foreground">
-            OW
+            {initials}
           </div>
           {!collapsed && (
             <div>
-              <p className="text-xs font-semibold">The Grand Kitchen</p>
-              <p className="text-[10px] text-muted-foreground">Owner</p>
+              <p className="text-xs font-semibold">{restaurantName}</p>
+              <p className="text-[10px] text-muted-foreground capitalize">{restaurant?.status ?? "—"}</p>
             </div>
           )}
         </div>
