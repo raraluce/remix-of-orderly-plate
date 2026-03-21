@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { DollarSign, ShoppingBag, Users, TrendingUp, ArrowRight, Clock, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mockOrders, mockTables, mockSessions } from "@/services/mockData";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 
 const stats = [
   { label: "Today's Revenue", value: "$2,847", icon: DollarSign, change: "+12%" },
