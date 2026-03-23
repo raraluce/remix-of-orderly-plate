@@ -11,9 +11,10 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onCheckout: () => void;
+  submitting?: boolean;
 }
 
-const CartSheet = ({ open, onClose, onCheckout }: Props) => {
+const CartSheet = ({ open, onClose, onCheckout, submitting = false }: Props) => {
   const { items, updateQuantity, removeItem, total } = useCart();
   const { config } = useRestaurantConfig();
   const [customiseItemId, setCustomiseItemId] = useState<string | null>(null);
@@ -138,8 +139,11 @@ const CartSheet = ({ open, onClose, onCheckout }: Props) => {
             <Button
               className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent"
               onClick={onCheckout}
+              disabled={submitting}
             >
-              {isPayLater ? (
+              {submitting ? (
+                <><span className="w-5 h-5 mr-2 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin inline-block" /> Placing Order…</>
+              ) : isPayLater ? (
                 <><Send className="w-5 h-5 mr-2" /> Send Order to Kitchen</>
               ) : (
                 <><CreditCard className="w-5 h-5 mr-2" /> Continue to Payment</>
