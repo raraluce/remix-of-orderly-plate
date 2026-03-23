@@ -362,7 +362,7 @@ const Menu = () => {
       </div>
 
       <FloatingCart onClick={() => setCartOpen(true)} />
-      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} onCheckout={handleCheckout} />
+      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} onCheckout={handleCheckout} submitting={submitting} />
     </div>
   );
 };
