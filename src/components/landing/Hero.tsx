@@ -42,6 +42,11 @@ const Hero = () => {
                   Try QR Demo
                 </Button>
               </Link>
+              <Link to="/join/my-restaurant/0c157e58-66a4-447c-94ed-13bd287fca69">
+                <Button size="lg" variant="ghost" className="rounded-full px-6 text-base border border-dashed border-destructive text-destructive hover:bg-destructive/10">
+                  🧪 Test QR Join
+                </Button>
+              </Link>
             </div>
 
             <div className="flex items-center gap-8 pt-4 animate-fade-up" style={{ animationDelay: "0.4s" }}>
