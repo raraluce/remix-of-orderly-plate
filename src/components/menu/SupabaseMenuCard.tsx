@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus, UtensilsCrossed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
@@ -10,14 +10,27 @@ const SupabaseMenuCard = ({ dish }: { dish: DishWithDetails }) => {
   const allergenNames = dish.allergens?.map((a) => a.allergen?.name).filter(Boolean) ?? [];
   const dietTags = dish.diet_tags?.map((t) => t.diet_type) ?? [];
 
+  const handleAdd = () =>
+    addItem({
+      id: dish.id,
+      name: dish.name,
+      price: Number(dish.price),
+      image: dish.image_url || "/placeholder.svg",
+    });
+
   return (
-    <div className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover-lift">
+    <button
+      type="button"
+      onClick={handleAdd}
+      className="group w-full text-left bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover-lift focus:outline-none focus:ring-2 focus:ring-primary/40"
+    >
       <div className="relative aspect-[4/3] overflow-hidden">
         {dish.image_url ? (
           <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
-            No image
+          <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-2 p-4">
+            <UtensilsCrossed className="w-8 h-8 text-muted-foreground/50" />
+            <span className="text-xs text-muted-foreground/70 font-medium text-center line-clamp-2">{dish.name}</span>
           </div>
         )}
         {dish.is_featured && (
@@ -30,7 +43,7 @@ const SupabaseMenuCard = ({ dish }: { dish: DishWithDetails }) => {
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-display font-semibold text-base">{dish.name}</h3>
+          <h3 className="font-display font-semibold text-base leading-tight">{dish.name}</h3>
           <span className="font-display font-bold text-primary shrink-0">€{Number(dish.price).toFixed(2)}</span>
         </div>
         {dish.description && (
@@ -56,23 +69,17 @@ const SupabaseMenuCard = ({ dish }: { dish: DishWithDetails }) => {
         )}
         {dish.prep_time_mins && (
           <p className="text-[10px] text-muted-foreground mb-2">
-            {dish.prep_time_mins} min · {dish.calories ? `${dish.calories} kcal` : ""}
+            {dish.prep_time_mins} min{dish.calories ? ` · ${dish.calories} kcal` : ""}
           </p>
         )}
-        <Button
-          size="sm"
-          className="w-full gradient-accent text-primary-foreground rounded-full font-semibold text-xs"
-          onClick={() => addItem({
-            id: dish.id,
-            name: dish.name,
-            price: Number(dish.price),
-            image: dish.image_url || "/placeholder.svg",
-          })}
+        <div
+          role="presentation"
+          className="w-full gradient-accent text-primary-foreground rounded-full font-semibold text-xs py-2 flex items-center justify-center pointer-events-none"
         >
           <Plus className="w-4 h-4 mr-1" /> Add to Order
-        </Button>
+        </div>
       </div>
-    </div>
+    </button>
   );
 };
 
