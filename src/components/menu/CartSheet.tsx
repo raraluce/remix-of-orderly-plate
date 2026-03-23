@@ -14,7 +14,7 @@ interface Props {
   submitting?: boolean;
 }
 
-const CartSheet = ({ open, onClose, onCheckout }: Props) => {
+const CartSheet = ({ open, onClose, onCheckout, submitting = false }: Props) => {
   const { items, updateQuantity, removeItem, total } = useCart();
   const { config } = useRestaurantConfig();
   const [customiseItemId, setCustomiseItemId] = useState<string | null>(null);
