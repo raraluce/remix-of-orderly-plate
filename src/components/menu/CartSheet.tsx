@@ -11,6 +11,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onCheckout: () => void;
+  submitting?: boolean;
 }
 
 const CartSheet = ({ open, onClose, onCheckout }: Props) => {
