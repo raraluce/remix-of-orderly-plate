@@ -42,11 +42,16 @@ const Menu = () => {
   const [personalizedMode, setPersonalizedMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { clearCart } = useCart();
+  const [searchParams] = useSearchParams();
+  const { items, clearCart } = useCart();
   const { allergenKeys, allergens } = useUserPreferences();
   const { session, tableNumber } = useTableSession();
   const { config } = useRestaurantConfig();
+
+  const sessionId = searchParams.get("session");
+  const urlRestaurantId = searchParams.get("restaurant");
 
   // Get restaurant
   const { data: restaurant, isLoading: restLoading } = useDefaultRestaurant();
