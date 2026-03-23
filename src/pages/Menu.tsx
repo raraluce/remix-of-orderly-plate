@@ -8,6 +8,7 @@ import CategoryNav from "@/components/menu/CategoryNav";
 import FloatingCart from "@/components/menu/FloatingCart";
 import CartSheet from "@/components/menu/CartSheet";
 import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useTableSession } from "@/contexts/TableSessionContext";
 import { Switch } from "@/components/ui/switch";
