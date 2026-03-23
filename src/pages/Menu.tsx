@@ -89,14 +89,62 @@ const Menu = () => {
 
   const filtered = personalizedMode ? baseFiltered.filter(isCompatible) : baseFiltered;
 
-  const handleCheckout = () => {
-    setCartOpen(false);
-    if (config.paymentModel === "pay-later") {
-      navigate("/order-confirmation");
-    } else {
-      navigate("/payment");
+  const handleCheckout = useCallback(async () => {
+    if (!sessionId || !urlRestaurantId) {
+      toast.error("No active table session. Please scan a QR code to start.");
+      return;
     }
-  };
+    if (items.length === 0) return;
+
+    setSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // 1. Create the order
+      const { data: order, error: orderErr } = await supabase
+        .from("orders")
+        .insert({
+          restaurant_id: urlRestaurantId,
+          session_id: sessionId,
+          user_id: user?.id ?? null,
+          status: "submitted",
+          submitted_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+
+      if (orderErr || !order) throw orderErr ?? new Error("Failed to create order");
+
+      // 2. Create order items
+      const orderItems = items.map((item) => ({
+        order_id: order.id,
+        session_id: sessionId,
+        dish_id: item.id,
+        quantity: item.quantity,
+        unit_price: item.price,
+      }));
+
+      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
+      if (itemsErr) throw itemsErr;
+
+      // 3. Navigate to confirmation with order details
+      setCartOpen(false);
+      const orderTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      navigate("/order-confirmation", {
+        state: {
+          orderId: order.id,
+          itemCount: items.reduce((s, i) => s + i.quantity, 0),
+          total: orderTotal,
+        },
+      });
+      clearCart();
+    } catch (err: any) {
+      console.error("Order submission failed:", err);
+      toast.error(err?.message || "Failed to submit order. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [sessionId, urlRestaurantId, items, navigate, clearCart]);
 
   const handleSearch = (q: string) => {
     setSearchQuery(q);
