@@ -70,8 +70,13 @@ const OrderConfirmation = () => {
               </Button>
             </Link>
           )}
-          <Link to="/menu">
+          <Link to="/order-status" state={{ orderId: state?.orderId }}>
             <Button variant="outline" className="w-full rounded-full border-border text-foreground">
+              <Clock className="w-4 h-4 mr-2" /> Track Order Status
+            </Button>
+          </Link>
+          <Link to="/menu">
+            <Button variant="ghost" className="w-full rounded-full text-muted-foreground text-sm">
               Order More
             </Button>
           </Link>
