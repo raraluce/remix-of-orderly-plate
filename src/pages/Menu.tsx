@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import heroFood from "@/assets/hero-food.jpg";
 
 /** Fetch the first active restaurant as a fallback */
-function useDefaultRestaurant() {
+function useDefaultRestaurant(enabled: boolean) {
   return useQuery({
     queryKey: ["default-restaurant"],
     queryFn: async () => {
@@ -33,6 +33,24 @@ function useDefaultRestaurant() {
       if (error) throw error;
       return data;
     },
+    enabled,
+  });
+}
+
+/** Fetch a specific restaurant by id (used when arriving from QR join) */
+function useRestaurantById(id: string | null) {
+  return useQuery({
+    queryKey: ["restaurant", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("*")
+        .eq("id", id!)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
   });
 }
 
@@ -53,8 +71,11 @@ const Menu = () => {
   const sessionId = searchParams.get("session");
   const urlRestaurantId = searchParams.get("restaurant");
 
-  // Get restaurant
-  const { data: restaurant, isLoading: restLoading } = useDefaultRestaurant();
+  // Prefer the restaurant id from the QR join URL; fall back to the first active one
+  const { data: byId, isLoading: byIdLoading } = useRestaurantById(urlRestaurantId);
+  const { data: fallback, isLoading: fallbackLoading } = useDefaultRestaurant(!urlRestaurantId);
+  const restaurant = byId ?? fallback;
+  const restLoading = urlRestaurantId ? byIdLoading : fallbackLoading;
   const restaurantId = restaurant?.id;
 
   // Fetch categories & dishes from Supabase
