@@ -1,124 +1,137 @@
 import { useState } from "react";
-import { QrCode, Users, Wifi, ExternalLink } from "lucide-react";
+import { QrCode, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockTables, mockSessions } from "@/services/mockData";
-import type { Table } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
+import { sessionService } from "@/services/sessionService";
 
-const statusStyles: Record<Table["status"], { bg: string; dot: string; label: string }> = {
-  available: { bg: "border-border bg-card", dot: "bg-emerald-500", label: "Available" },
-  occupied: { bg: "border-primary/30 bg-primary/5", dot: "bg-primary", label: "Occupied" },
-  reserved: { bg: "border-amber-500/30 bg-amber-500/5", dot: "bg-amber-500", label: "Reserved" },
-  cleaning: { bg: "border-border bg-card opacity-60", dot: "bg-muted-foreground", label: "Cleaning" },
+const statusStyles: Record<string, { bg: string; dot: string; label: string }> = {
+  open: { bg: "bg-emerald-500/10 border-emerald-500/30", dot: "bg-emerald-500", label: "Open" },
+  occupied: { bg: "bg-primary/10 border-primary/30", dot: "bg-primary", label: "Occupied" },
+  settling: { bg: "bg-amber-500/10 border-amber-500/30", dot: "bg-amber-500", label: "Settling" },
+  closed: { bg: "bg-secondary border-border", dot: "bg-muted-foreground", label: "Closed" },
 };
 
 const TablesQR = () => {
-  const [tables, setTables] = useState(mockTables);
-  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  const { restaurantId, restaurant } = useRestaurantConfig();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const session = selectedTable?.currentSessionId
-    ? mockSessions.find((s) => s.id === selectedTable.currentSessionId)
-    : null;
+  const { data: tables = [], isLoading } = useQuery({
+    queryKey: ["restaurant-tables", restaurantId],
+    queryFn: () => sessionService.getTablesByRestaurant(restaurantId!),
+    enabled: !!restaurantId,
+  });
+
+  const { data: activeSession } = useQuery({
+    queryKey: ["table-active-session", selectedId],
+    queryFn: () => sessionService.findActiveSession(selectedId!),
+    enabled: !!selectedId,
+  });
+
+  const selected = tables.find((t: any) => t.id === selectedId);
+  const participants = (activeSession as any)?.session_participants ?? [];
+
+  const joinUrl = restaurant && selected
+    ? `${window.location.origin}/join/${restaurant.slug}/${selected.id}`
+    : "";
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-bold">Tables & QR Codes</h1>
-          <p className="text-sm text-muted-foreground">
-            {tables.filter((t) => t.status === "occupied").length} occupied · {tables.filter((t) => t.status === "available").length} available
-          </p>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Table Grid */}
-        <div>
-          <h2 className="font-display font-semibold text-sm mb-3">Floor Plan</h2>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-            {tables.map((table) => {
-              const st = statusStyles[table.status];
-              return (
-                <button
-                  key={table.id}
-                  onClick={() => setSelectedTable(table)}
-                  className={`p-4 rounded-2xl border-2 text-center transition-all hover:scale-105 ${st.bg} ${
-                    selectedTable?.id === table.id ? "ring-2 ring-primary" : ""
-                  }`}
-                >
-                  <p className="font-display font-bold text-lg">{table.number}</p>
-                  <div className="flex items-center justify-center gap-1.5 mt-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
-                    <span className="text-[10px] text-muted-foreground">{st.label}</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">{table.capacity} seats</p>
-                </button>
-              );
-            })}
+    <div className="p-6 grid lg:grid-cols-[1fr,360px] gap-6">
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-display font-bold">Tables & QR Codes</h1>
+            <p className="text-sm text-muted-foreground">{tables.length} tables · tap to view QR</p>
           </div>
         </div>
 
-        {/* Table Detail */}
-        <div>
-          {selectedTable ? (
-            <div className="bg-card border border-border rounded-2xl p-6 space-y-5 animate-scale-in">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display font-bold text-lg">Table {selectedTable.number}</h2>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  statusStyles[selectedTable.status].bg
-                }`}>
-                  {statusStyles[selectedTable.status].label}
-                </span>
-              </div>
-
-              {/* QR Code placeholder */}
-              <div className="bg-secondary rounded-2xl p-8 flex flex-col items-center gap-4">
-                <div className="w-32 h-32 bg-foreground/10 rounded-2xl flex items-center justify-center">
-                  <QrCode className="w-16 h-16 text-foreground/30" />
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  {selectedTable.qrCode}
-                </p>
-                <Button size="sm" variant="outline" className="rounded-full text-xs">
-                  <ExternalLink className="w-3.5 h-3.5 mr-1" /> Download QR
-                </Button>
-              </div>
-
-              {/* Session info */}
-              {session && (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Wifi className="w-4 h-4 text-emerald-400" />
-                    <span className="text-sm font-semibold">Active Session</span>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 text-muted-foreground">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading tables…
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+            {tables.map((t: any) => {
+              const s = statusStyles[t.status] ?? statusStyles.closed;
+              const isSel = t.id === selectedId;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedId(t.id)}
+                  className={`p-4 rounded-2xl border text-center transition-all hover:scale-[1.02] ${s.bg} ${isSel ? "ring-2 ring-primary" : ""}`}
+                >
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">{s.label}</p>
                   </div>
-                  <div className="space-y-2">
-                    {session.users.map((u, i) => (
-                      <div key={i} className="flex items-center gap-3 bg-secondary rounded-xl p-3">
-                        <div className={`w-8 h-8 rounded-full ${u.avatarColor} flex items-center justify-center text-xs font-bold text-primary-foreground`}>
-                          {u.initials}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold">{u.name}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {u.isHost ? "Host" : "Guest"} · Joined {new Date(u.joinedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="font-display font-bold text-lg">{t.label}</p>
+                  {t.capacity && <p className="text-[10px] text-muted-foreground">Cap. {t.capacity}</p>}
+                </button>
+              );
+            })}
+            {tables.length === 0 && (
+              <p className="col-span-full text-center text-muted-foreground py-8 text-sm">No tables yet</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Detail */}
+      <div className="bg-card border border-border rounded-2xl p-5 h-fit">
+        {!selected ? (
+          <div className="text-center py-12">
+            <QrCode className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Select a table to see its QR code and active session</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-bold">Table</p>
+              <h2 className="text-xl font-display font-bold">{selected.label}</h2>
+            </div>
+
+            <div className="aspect-square bg-white rounded-xl flex items-center justify-center p-4">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(joinUrl)}`}
+                alt={`QR for table ${selected.label}`}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <div className="text-[10px] text-muted-foreground break-all bg-secondary rounded-lg p-2 font-mono">
+              {joinUrl}
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full rounded-full"
+              onClick={() => navigator.clipboard.writeText(joinUrl)}
+            >
+              Copy Link
+            </Button>
+
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-display font-bold">Active Session</h3>
+              </div>
+              {!activeSession ? (
+                <p className="text-xs text-muted-foreground">No active session at this table.</p>
+              ) : (
+                <div className="space-y-2">
+                  {participants.map((p: any) => (
+                    <div key={p.id} className="flex items-center justify-between text-xs">
+                      <span className="font-semibold">{p.display_name || (p.is_guest ? "Guest" : "Diner")}</span>
+                      <span className="text-muted-foreground">
+                        {new Date(p.joined_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
-
-              <div className="text-xs text-muted-foreground">
-                Capacity: {selectedTable.capacity} seats · ID: {selectedTable.id}
-              </div>
             </div>
-          ) : (
-            <div className="bg-card border border-border rounded-2xl p-12 flex flex-col items-center text-center">
-              <QrCode className="w-12 h-12 text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">Select a table to view details & QR code</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
