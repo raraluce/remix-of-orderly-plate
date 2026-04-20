@@ -193,7 +193,7 @@ const Payment = () => {
               <button
                 key={opt.value}
                 onClick={() => { setTipPercent(opt.value); setCustomTip(""); }}
-                className={`py-3 rounded-xl text-sm font-semibold transition-all duration-200 €{
+                className={`py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   tipPercent === opt.value && !customTip
                     ? "gradient-accent text-primary-foreground glow-accent-sm"
                     : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -232,7 +232,7 @@ const Payment = () => {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setSplitMode("equal")}
-              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 €{
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 splitMode === "equal"
                   ? "gradient-accent text-primary-foreground glow-accent-sm"
                   : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -242,7 +242,7 @@ const Payment = () => {
             </button>
             <button
               onClick={() => setSplitMode("by-dish")}
-              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 €{
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 splitMode === "by-dish"
                   ? "gradient-accent text-primary-foreground glow-accent-sm"
                   : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -259,13 +259,13 @@ const Payment = () => {
                   <button
                     key={n}
                     onClick={() => setSplitCount(n)}
-                    className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 €{
+                    className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       splitCount === n
                         ? "gradient-accent text-primary-foreground glow-accent-sm"
                         : "bg-secondary text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {n === 1 ? "Just me" : `€{n}`}
+                    {n === 1 ? "Just me" : `${n}`}
                   </button>
                 ))}
               </div>
@@ -283,7 +283,7 @@ const Payment = () => {
               {items.map((item) => (
                 <label
                   key={item.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer €{
+                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer ${
                     selectedDishIds.includes(item.id)
                       ? "bg-primary/10 border-primary/30"
                       : "bg-secondary border-border hover:border-border/80"
