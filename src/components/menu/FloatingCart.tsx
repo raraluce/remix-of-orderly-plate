@@ -22,7 +22,7 @@ const FloatingCart = ({ onClick }: Props) => {
         </span>
       </div>
       <span className="font-semibold">View Order</span>
-      <span className="font-display font-bold">${total.toFixed(2)}</span>
+      <span className="font-display font-bold">€{total.toFixed(2)}</span>
     </button>
   );
 };

@@ -53,10 +53,10 @@ const CartSheet = ({ open, onClose, onCheckout, submitting = false }: Props) => 
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm truncate">{item.name}</h4>
                       <p className="text-sm text-primary font-display font-bold">
-                        ${(unitPrice * item.quantity).toFixed(2)}
+                        €{(unitPrice * item.quantity).toFixed(2)}
                         {(cust?.priceAdjustment ?? 0) > 0 && (
                           <span className="text-[11px] text-muted-foreground font-normal ml-1">
-                            (${item.price.toFixed(2)} + ${cust!.priceAdjustment.toFixed(2)})
+                            (€{item.price.toFixed(2)} + €{cust!.priceAdjustment.toFixed(2)})
                           </span>
                         )}
                       </p>
@@ -126,15 +126,15 @@ const CartSheet = ({ open, onClose, onCheckout, submitting = false }: Props) => 
           <div className="p-5 border-t border-border space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold">${total.toFixed(2)}</span>
+              <span className="font-semibold">€{total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Service fee</span>
-              <span className="font-semibold">${(total * 0.05).toFixed(2)}</span>
+              <span className="font-semibold">€{(total * 0.05).toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-display font-bold text-lg">
               <span>Total</span>
-              <span className="text-gradient">${(total * 1.05).toFixed(2)}</span>
+              <span className="text-gradient">€{(total * 1.05).toFixed(2)}</span>
             </div>
             <Button
               className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent"
