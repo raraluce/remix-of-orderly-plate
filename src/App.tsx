@@ -44,16 +44,16 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-      <AppUserProvider>
-        <RestaurantConfigProvider>
-        <SettingsProvider>
-          <UserPreferencesProvider>
-            <TableSessionProvider>
-              <CartProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
+        <AppUserProvider>
+          <RestaurantConfigProvider>
+          <SettingsProvider>
+            <UserPreferencesProvider>
+              <TableSessionProvider>
+                <CartProvider>
+                  <Toaster />
+                  <Sonner />
                   <Routes>
                     {/* Landing */}
                     <Route path="/" element={<Index />} />
@@ -100,14 +100,14 @@ const App = () => (
 
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </BrowserRouter>
-              </CartProvider>
-            </TableSessionProvider>
-          </UserPreferencesProvider>
-        </SettingsProvider>
-        </RestaurantConfigProvider>
-      </AppUserProvider>
-      </AuthProvider>
+                </CartProvider>
+              </TableSessionProvider>
+            </UserPreferencesProvider>
+          </SettingsProvider>
+          </RestaurantConfigProvider>
+        </AppUserProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
