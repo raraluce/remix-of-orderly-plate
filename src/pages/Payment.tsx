@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CreditCard, Users, Percent, Check, Receipt, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const tipOptions = [
   { label: "No tip", value: 0 },
@@ -21,9 +23,12 @@ const DISCOUNT_CODES: Record<string, { label: string; percent: number }> = {
 type SplitMode = "equal" | "by-dish";
 
 const Payment = () => {
-  const { items, total } = useCart();
+  const { items, total, clearCart } = useCart();
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session");
+  const restaurantId = searchParams.get("restaurant");
   const [tipPercent, setTipPercent] = useState(0.15);
   const [splitCount, setSplitCount] = useState(1);
   const [processing, setProcessing] = useState(false);
@@ -68,11 +73,32 @@ const Payment = () => {
     );
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     setProcessing(true);
-    setTimeout(() => {
-      navigate("/order-confirmation");
-    }, 1800);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (sessionId && restaurantId) {
+        const { error } = await supabase.from("payments").insert({
+          session_id: sessionId,
+          restaurant_id: restaurantId,
+          user_id: user?.id ?? null,
+          amount: payAmount,
+          tip_amount: tipAmount,
+          status: "completed",
+          split_mode: splitMode,
+          paid_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+      }
+      clearCart();
+      navigate("/order-confirmation", {
+        state: { orderId: sessionId ?? "demo", itemCount: items.reduce((s, i) => s + i.quantity, 0), total: payAmount },
+      });
+    } catch (err: any) {
+      console.error("Payment failed:", err);
+      toast.error(err?.message || "Payment failed. Please try again.");
+      setProcessing(false);
+    }
   };
 
   const payAmount = splitMode === "equal"
