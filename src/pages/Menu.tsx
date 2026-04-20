@@ -156,6 +156,8 @@ const Menu = () => {
           orderId: order.id,
           itemCount: items.reduce((s, i) => s + i.quantity, 0),
           total: orderTotal,
+          sessionId,
+          restaurantId: urlRestaurantId,
         },
       });
       clearCart();
