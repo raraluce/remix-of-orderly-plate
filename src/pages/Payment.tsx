@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CreditCard, Users, Percent, Check, Receipt, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const tipOptions = [
   { label: "No tip", value: 0 },
@@ -21,9 +23,12 @@ const DISCOUNT_CODES: Record<string, { label: string; percent: number }> = {
 type SplitMode = "equal" | "by-dish";
 
 const Payment = () => {
-  const { items, total } = useCart();
+  const { items, total, clearCart } = useCart();
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get("session");
+  const restaurantId = searchParams.get("restaurant");
   const [tipPercent, setTipPercent] = useState(0.15);
   const [splitCount, setSplitCount] = useState(1);
   const [processing, setProcessing] = useState(false);
@@ -68,11 +73,32 @@ const Payment = () => {
     );
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     setProcessing(true);
-    setTimeout(() => {
-      navigate("/order-confirmation");
-    }, 1800);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (sessionId && restaurantId) {
+        const { error } = await supabase.from("payments").insert({
+          session_id: sessionId,
+          restaurant_id: restaurantId,
+          user_id: user?.id ?? null,
+          amount: payAmount,
+          tip_amount: tipAmount,
+          status: "completed",
+          split_mode: splitMode,
+          paid_at: new Date().toISOString(),
+        });
+        if (error) throw error;
+      }
+      clearCart();
+      navigate("/order-confirmation", {
+        state: { orderId: sessionId ?? "demo", itemCount: items.reduce((s, i) => s + i.quantity, 0), total: payAmount },
+      });
+    } catch (err: any) {
+      console.error("Payment failed:", err);
+      toast.error(err?.message || "Payment failed. Please try again.");
+      setProcessing(false);
+    }
   };
 
   const payAmount = splitMode === "equal"
@@ -116,7 +142,7 @@ const Payment = () => {
             <div key={item.id} className="space-y-1">
               <div className="flex justify-between text-sm">
                 <span>{item.quantity}× {item.name}</span>
-                <span className="font-semibold">${(unitPrice * item.quantity).toFixed(2)}</span>
+                <span className="font-semibold">€{(unitPrice * item.quantity).toFixed(2)}</span>
               </div>
               {item.customisations && (
                 <div className="text-[11px] text-muted-foreground pl-4 space-y-0.5">
@@ -136,17 +162,17 @@ const Payment = () => {
           })}
           <div className="border-t border-border pt-3 flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-semibold">${total.toFixed(2)}</span>
+            <span className="font-semibold">€{total.toFixed(2)}</span>
           </div>
           {appliedDiscount && (
             <div className="flex justify-between text-sm">
               <span className="text-emerald-500">Discount ({appliedDiscount.code})</span>
-              <span className="font-semibold text-emerald-500">−${discountAmount.toFixed(2)}</span>
+              <span className="font-semibold text-emerald-500">−€{discountAmount.toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Service fee</span>
-            <span className="font-semibold">${serviceFee.toFixed(2)}</span>
+            <span className="font-semibold">€{serviceFee.toFixed(2)}</span>
           </div>
         </div>
 
@@ -206,7 +232,7 @@ const Payment = () => {
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Custom:</span>
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
               <input
                 type="number"
                 value={customTip}
@@ -218,7 +244,7 @@ const Payment = () => {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tip amount</span>
-            <span className="font-semibold text-primary">${tipAmount.toFixed(2)}</span>
+            <span className="font-semibold text-primary">€{tipAmount.toFixed(2)}</span>
           </div>
         </div>
 
@@ -271,7 +297,7 @@ const Payment = () => {
               </div>
               {splitCount > 1 && (
                 <p className="text-sm text-muted-foreground text-center">
-                  Each person pays <span className="text-primary font-display font-bold">${perPerson.toFixed(2)}</span>
+                  Each person pays <span className="text-primary font-display font-bold">€{perPerson.toFixed(2)}</span>
                 </p>
               )}
             </>
@@ -297,14 +323,14 @@ const Payment = () => {
                     <p className="text-sm font-semibold truncate">{item.quantity}× {item.name}</p>
                   </div>
                   <span className="text-sm font-display font-bold text-primary shrink-0">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    €{(item.price * item.quantity).toFixed(2)}
                   </span>
                 </label>
               ))}
               {selectedDishIds.length > 0 && (
                 <div className="pt-2 border-t border-border flex justify-between text-sm">
                   <span className="text-muted-foreground">Your dishes + fees</span>
-                  <span className="font-display font-bold text-primary">${selectedDishShare.toFixed(2)}</span>
+                  <span className="font-display font-bold text-primary">€{selectedDishShare.toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -315,18 +341,18 @@ const Payment = () => {
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <div className="flex justify-between font-display font-bold text-xl">
             <span>Total</span>
-            <span className="text-gradient">${grandTotal.toFixed(2)}</span>
+            <span className="text-gradient">€{grandTotal.toFixed(2)}</span>
           </div>
           {splitMode === "equal" && splitCount > 1 && (
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Your share ({splitCount} people)</span>
-              <span className="font-semibold text-foreground">${perPerson.toFixed(2)}</span>
+              <span className="font-semibold text-foreground">€{perPerson.toFixed(2)}</span>
             </div>
           )}
           {splitMode === "by-dish" && selectedDishIds.length > 0 && (
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Your dishes ({selectedDishIds.length} items)</span>
-              <span className="font-semibold text-foreground">${selectedDishShare.toFixed(2)}</span>
+              <span className="font-semibold text-foreground">€{selectedDishShare.toFixed(2)}</span>
             </div>
           )}
 
@@ -354,7 +380,7 @@ const Payment = () => {
               </span>
             ) : (
               <>
-                <CreditCard className="w-5 h-5 mr-2" /> Pay ${payAmount.toFixed(2)}
+                <CreditCard className="w-5 h-5 mr-2" /> Pay €{payAmount.toFixed(2)}
               </>
             )}
           </Button>

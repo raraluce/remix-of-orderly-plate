@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { PairingTag, FoodPreference } from "@/data/menuData";
+import { analyticsService } from "@/services/analyticsService";
 
 export interface CartCustomisations {
   removedIngredients: string[];
@@ -48,7 +49,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
     // Fire analytics with pairing metadata for recommendation relations
     try {
-      const { analyticsService } = require("@/services/analyticsService");
       analyticsService.track("dish_added_to_cart", {
         dishId: item.id,
         dishName: item.name,

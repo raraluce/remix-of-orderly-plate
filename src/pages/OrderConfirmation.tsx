@@ -7,6 +7,8 @@ interface OrderState {
   orderId: string;
   itemCount: number;
   total: number;
+  sessionId?: string;
+  restaurantId?: string;
 }
 
 const OrderConfirmation = () => {
@@ -20,6 +22,9 @@ const OrderConfirmation = () => {
   const itemCount = state?.itemCount ?? 0;
   const total = state?.total ?? 0;
   const totalWithFee = total * 1.05;
+  const paymentHref = state?.sessionId && state?.restaurantId
+    ? `/payment?session=${state.sessionId}&restaurant=${state.restaurantId}`
+    : "/payment";
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -59,7 +64,7 @@ const OrderConfirmation = () => {
 
         <div className="flex flex-col gap-3">
           {isPayLater && (
-            <Link to="/payment">
+            <Link to={paymentHref}>
               <Button className="w-full gradient-accent text-primary-foreground rounded-full font-semibold py-6 text-base glow-accent">
                 <CreditCard className="w-5 h-5 mr-2" /> Pay Now — €{totalWithFee.toFixed(2)}
               </Button>

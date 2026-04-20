@@ -35,6 +35,45 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_records: {
+        Row: {
+          consent_type: string
+          created_at: string
+          granted: boolean
+          granted_at: string | null
+          id: string
+          ip_address: string | null
+          revoked_at: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          consent_type: string
+          created_at?: string
+          granted: boolean
+          granted_at?: string | null
+          id?: string
+          ip_address?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          consent_type?: string
+          created_at?: string
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          ip_address?: string | null
+          revoked_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       dish_allergens: {
         Row: {
           allergen_id: string
@@ -399,6 +438,7 @@ export type Database = {
           provider_ref: string | null
           restaurant_id: string
           session_id: string
+          split_mode: string | null
           status: Database["public"]["Enums"]["payment_status"]
           tip_amount: number
           updated_at: string
@@ -414,6 +454,7 @@ export type Database = {
           provider_ref?: string | null
           restaurant_id: string
           session_id: string
+          split_mode?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           tip_amount?: number
           updated_at?: string
@@ -429,6 +470,7 @@ export type Database = {
           provider_ref?: string | null
           restaurant_id?: string
           session_id?: string
+          split_mode?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           tip_amount?: number
           updated_at?: string
@@ -798,7 +840,55 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      close_table_session: {
+        Args: { p_session_id: string }
+        Returns: undefined
+      }
+      debug_auth_uid: { Args: never; Returns: string }
+      get_restaurant_revenue_stats: {
+        Args: {
+          p_from_date: string
+          p_restaurant_id: string
+          p_to_date: string
+        }
+        Returns: {
+          avg_order_value: number
+          avg_session_spend: number
+          total_orders: number
+          total_revenue: number
+          total_sessions: number
+        }[]
+      }
+      get_revenue_by_day: {
+        Args: {
+          p_from_date: string
+          p_restaurant_id: string
+          p_to_date: string
+        }
+        Returns: {
+          day: string
+          order_count: number
+          revenue: number
+        }[]
+      }
+      get_top_dishes: {
+        Args: {
+          p_from_date: string
+          p_limit: number
+          p_restaurant_id: string
+          p_to_date: string
+        }
+        Returns: {
+          dish_id: string
+          dish_name: string
+          total_ordered: number
+          total_revenue: number
+        }[]
+      }
+      open_table_session: {
+        Args: { p_restaurant_id: string; p_table_id: string }
+        Returns: string
+      }
     }
     Enums: {
       allergen_severity: "preference" | "intolerance" | "allergy"
