@@ -116,7 +116,7 @@ const Payment = () => {
             <div key={item.id} className="space-y-1">
               <div className="flex justify-between text-sm">
                 <span>{item.quantity}× {item.name}</span>
-                <span className="font-semibold">${(unitPrice * item.quantity).toFixed(2)}</span>
+                <span className="font-semibold">€{(unitPrice * item.quantity).toFixed(2)}</span>
               </div>
               {item.customisations && (
                 <div className="text-[11px] text-muted-foreground pl-4 space-y-0.5">
@@ -136,17 +136,17 @@ const Payment = () => {
           })}
           <div className="border-t border-border pt-3 flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-semibold">${total.toFixed(2)}</span>
+            <span className="font-semibold">€{total.toFixed(2)}</span>
           </div>
           {appliedDiscount && (
             <div className="flex justify-between text-sm">
               <span className="text-emerald-500">Discount ({appliedDiscount.code})</span>
-              <span className="font-semibold text-emerald-500">−${discountAmount.toFixed(2)}</span>
+              <span className="font-semibold text-emerald-500">−€{discountAmount.toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Service fee</span>
-            <span className="font-semibold">${serviceFee.toFixed(2)}</span>
+            <span className="font-semibold">€{serviceFee.toFixed(2)}</span>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ const Payment = () => {
               <button
                 key={opt.value}
                 onClick={() => { setTipPercent(opt.value); setCustomTip(""); }}
-                className={`py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`py-3 rounded-xl text-sm font-semibold transition-all duration-200 €{
                   tipPercent === opt.value && !customTip
                     ? "gradient-accent text-primary-foreground glow-accent-sm"
                     : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -206,7 +206,7 @@ const Payment = () => {
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Custom:</span>
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
               <input
                 type="number"
                 value={customTip}
@@ -218,7 +218,7 @@ const Payment = () => {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tip amount</span>
-            <span className="font-semibold text-primary">${tipAmount.toFixed(2)}</span>
+            <span className="font-semibold text-primary">€{tipAmount.toFixed(2)}</span>
           </div>
         </div>
 
@@ -232,7 +232,7 @@ const Payment = () => {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setSplitMode("equal")}
-              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 €{
                 splitMode === "equal"
                   ? "gradient-accent text-primary-foreground glow-accent-sm"
                   : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -242,7 +242,7 @@ const Payment = () => {
             </button>
             <button
               onClick={() => setSplitMode("by-dish")}
-              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 €{
                 splitMode === "by-dish"
                   ? "gradient-accent text-primary-foreground glow-accent-sm"
                   : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -259,19 +259,19 @@ const Payment = () => {
                   <button
                     key={n}
                     onClick={() => setSplitCount(n)}
-                    className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all duration-200 €{
                       splitCount === n
                         ? "gradient-accent text-primary-foreground glow-accent-sm"
                         : "bg-secondary text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {n === 1 ? "Just me" : `${n}`}
+                    {n === 1 ? "Just me" : `€{n}`}
                   </button>
                 ))}
               </div>
               {splitCount > 1 && (
                 <p className="text-sm text-muted-foreground text-center">
-                  Each person pays <span className="text-primary font-display font-bold">${perPerson.toFixed(2)}</span>
+                  Each person pays <span className="text-primary font-display font-bold">€{perPerson.toFixed(2)}</span>
                 </p>
               )}
             </>
@@ -283,7 +283,7 @@ const Payment = () => {
               {items.map((item) => (
                 <label
                   key={item.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer €{
                     selectedDishIds.includes(item.id)
                       ? "bg-primary/10 border-primary/30"
                       : "bg-secondary border-border hover:border-border/80"
@@ -297,14 +297,14 @@ const Payment = () => {
                     <p className="text-sm font-semibold truncate">{item.quantity}× {item.name}</p>
                   </div>
                   <span className="text-sm font-display font-bold text-primary shrink-0">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    €{(item.price * item.quantity).toFixed(2)}
                   </span>
                 </label>
               ))}
               {selectedDishIds.length > 0 && (
                 <div className="pt-2 border-t border-border flex justify-between text-sm">
                   <span className="text-muted-foreground">Your dishes + fees</span>
-                  <span className="font-display font-bold text-primary">${selectedDishShare.toFixed(2)}</span>
+                  <span className="font-display font-bold text-primary">€{selectedDishShare.toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -315,18 +315,18 @@ const Payment = () => {
         <div className="bg-card border border-border rounded-2xl p-5 space-y-4 animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <div className="flex justify-between font-display font-bold text-xl">
             <span>Total</span>
-            <span className="text-gradient">${grandTotal.toFixed(2)}</span>
+            <span className="text-gradient">€{grandTotal.toFixed(2)}</span>
           </div>
           {splitMode === "equal" && splitCount > 1 && (
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Your share ({splitCount} people)</span>
-              <span className="font-semibold text-foreground">${perPerson.toFixed(2)}</span>
+              <span className="font-semibold text-foreground">€{perPerson.toFixed(2)}</span>
             </div>
           )}
           {splitMode === "by-dish" && selectedDishIds.length > 0 && (
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Your dishes ({selectedDishIds.length} items)</span>
-              <span className="font-semibold text-foreground">${selectedDishShare.toFixed(2)}</span>
+              <span className="font-semibold text-foreground">€{selectedDishShare.toFixed(2)}</span>
             </div>
           )}
 
@@ -354,7 +354,7 @@ const Payment = () => {
               </span>
             ) : (
               <>
-                <CreditCard className="w-5 h-5 mr-2" /> Pay ${payAmount.toFixed(2)}
+                <CreditCard className="w-5 h-5 mr-2" /> Pay €{payAmount.toFixed(2)}
               </>
             )}
           </Button>
