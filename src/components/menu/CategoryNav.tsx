@@ -9,25 +9,21 @@ interface Props {
   categories?: CategoryItem[];
 }
 
-const defaultCategories: CategoryItem[] = [
-  { id: "all", name: "All" },
-];
-
 const CategoryNav = ({ active, onChange, categories }: Props) => {
   const cats = categories && categories.length > 0
     ? [{ id: "all", name: "All" }, ...categories]
-    : defaultCategories;
+    : [{ id: "all", name: "All" }];
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
       {cats.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onChange(cat.id)}
-          className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+          className={`shrink-0 whitespace-nowrap px-6 py-3 rounded-full text-sm font-body font-medium transition-all duration-200 ${
             active === cat.id
-              ? "gradient-accent text-primary-foreground glow-accent-sm"
-              : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30"
+              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10"
+              : "bg-surface-high text-foreground hover:bg-surface-highest"
           }`}
         >
           {cat.name}

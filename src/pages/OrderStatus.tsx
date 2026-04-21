@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, ChefHat, CheckCircle2, UtensilsCrossed, CreditCard, Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 import { useTableSession } from "@/contexts/TableSessionContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,12 +8,11 @@ import type { Database } from "@/integrations/supabase/types";
 
 type DbOrderStatus = Database["public"]["Enums"]["order_status"];
 
-const steps: { key: DbOrderStatus; label: string; icon: typeof Clock; desc: string }[] = [
-  { key: "submitted", label: "Order Received", icon: CheckCircle2, desc: "Your order has been received by the kitchen" },
-  { key: "acknowledged", label: "Confirmed", icon: CheckCircle2, desc: "The kitchen has confirmed your order" },
-  { key: "preparing", label: "Preparing", icon: ChefHat, desc: "The chef is working on your dishes" },
-  { key: "ready", label: "Ready to Serve", icon: Bell, desc: "Your order is ready and coming to your table" },
-  { key: "delivered", label: "Served", icon: UtensilsCrossed, desc: "Enjoy your meal!" },
+const steps: { key: DbOrderStatus; label: string; icon: string }[] = [
+  { key: "submitted", label: "Confirmed", icon: "check" },
+  { key: "preparing", label: "Preparing", icon: "skillet" },
+  { key: "ready", label: "Ready", icon: "notifications" },
+  { key: "delivered", label: "Served", icon: "home" },
 ];
 
 const OrderStatus = () => {
@@ -24,7 +21,6 @@ const OrderStatus = () => {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
-  // Order id can come from navigate state or ?order= query param
   const stateOrderId = (location.state as { orderId?: string } | null)?.orderId;
   const orderId = stateOrderId ?? searchParams.get("order") ?? null;
 
@@ -42,7 +38,6 @@ const OrderStatus = () => {
     enabled: !!orderId,
   });
 
-  // Realtime subscription on this order
   useEffect(() => {
     if (!orderId) return;
     const ch = supabase
@@ -51,108 +46,114 @@ const OrderStatus = () => {
         queryClient.invalidateQueries({ queryKey: ["order", orderId] });
       })
       .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
+    return () => { supabase.removeChannel(ch); };
   }, [orderId, queryClient]);
 
   const currentStatus = order?.status as DbOrderStatus | undefined;
-  const currentStep = currentStatus ? Math.max(0, steps.findIndex((s) => s.key === currentStatus)) : 0;
+  // Map db status onto progress index
+  const statusToStep: Record<string, number> = {
+    submitted: 0, acknowledged: 0, preparing: 1, ready: 2, delivered: 3,
+  };
+  const currentStep = currentStatus ? statusToStep[currentStatus] ?? 0 : 0;
+  const progressPct = currentStatus ? (currentStep / (steps.length - 1)) * 100 : 0;
+  const shortId = orderId ? orderId.slice(0, 8).toUpperCase() : "—";
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <header className="border-b border-border glass sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <Link to="/table" className="p-2 rounded-full hover:bg-secondary transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+    <div className="min-h-screen bg-background pb-12 paper-grain">
+      <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
+        <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
+          <Link to="/table" className="text-primary active:scale-95 transition-transform">
+            <span className="material-symbols-outlined">arrow_back</span>
           </Link>
-          <div>
-            <h1 className="font-display font-bold text-lg">Order Status</h1>
-            <p className="text-xs text-muted-foreground">
-              {tableNumber ? `Table ${tableNumber}` : "Live order"}
-              {orderId && ` · #${orderId.slice(0, 8).toUpperCase()}`}
-            </p>
-          </div>
+          <h1 className="font-display italic text-xl">Order Status</h1>
+          <span className="material-symbols-outlined text-primary">more_vert</span>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-md">
-        {/* Live indicator */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs text-muted-foreground">Live tracking</span>
-        </div>
+      <main className="pt-24 px-6 max-w-2xl mx-auto">
+        {/* Hero confirmation */}
+        <section className="flex flex-col items-center text-center space-y-6 mb-16">
+          <div className="w-16 h-16 rounded-full bg-secondary-container/60 flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined text-[36px]">restaurant</span>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-4xl md:text-5xl font-display italic font-medium leading-tight">
+              {currentStatus === "delivered" ? "Bon appétit." : "Your order is in — thanks!"}
+            </h2>
+            <p className="text-muted-foreground font-body text-[10px] uppercase tracking-[0.2em] font-semibold">
+              Order #{shortId}
+              {tableNumber && ` · Table ${tableNumber}`}
+            </p>
+          </div>
+        </section>
+
+        {/* Progress tracker — Stitch horizontal stepper */}
+        <section className="mb-16">
+          <div className="relative flex justify-between items-start">
+            <div className="absolute top-4 left-0 w-full h-[2px] bg-surface-highest z-0" />
+            <motion.div
+              className="absolute top-4 left-0 h-[2px] bg-primary z-0"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            />
+
+            {steps.map((step, i) => {
+              const isComplete = i <= currentStep && !!currentStatus;
+              const isCurrent = i === currentStep && !!currentStatus;
+              return (
+                <div key={step.key} className="relative z-10 flex flex-col items-center gap-3 flex-1">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ring-4 ring-surface transition-colors duration-500 ${
+                      isComplete ? "bg-primary text-primary-foreground" : "bg-surface-highest text-muted-foreground"
+                    }`}
+                  >
+                    <span
+                      className={`material-symbols-outlined text-[16px] ${isCurrent ? "animate-pulse-soft" : ""}`}
+                      style={isComplete ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                    >
+                      {step.icon}
+                    </span>
+                  </div>
+                  <span className={`text-[10px] uppercase tracking-widest font-body font-bold text-center ${isComplete ? "text-primary" : "text-muted-foreground"}`}>
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         {!orderId && (
-          <p className="text-center text-sm text-muted-foreground mb-6">
-            No active order. Place an order from the menu to track its status here.
+          <p className="text-center text-sm text-muted-foreground italic font-body py-8">
+            No active order. Place an order from the menu to track it here.
           </p>
         )}
 
-        {/* Status Steps */}
-        <div className="space-y-0">
-          {steps.map((step, i) => {
-            const isActive = i <= currentStep && !!currentStatus;
-            const isCurrent = i === currentStep && !!currentStatus;
-            const Icon = step.icon;
-
-            return (
-              <div key={step.key} className="relative">
-                {i > 0 && (
-                  <div className={`absolute left-6 -top-4 w-0.5 h-4 transition-colors duration-500 ${isActive ? "bg-primary" : "bg-border"}`} />
-                )}
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`flex gap-4 p-4 rounded-2xl mb-2 transition-all duration-500 ${
-                    isCurrent ? "bg-card border border-primary/30 glow-accent-sm" : isActive ? "bg-card/50" : "opacity-40"
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-500 ${
-                    isCurrent ? "gradient-accent" : isActive ? "bg-primary/20" : "bg-secondary"
-                  }`}>
-                    <Icon className={`w-6 h-6 ${isCurrent ? "text-primary-foreground" : isActive ? "text-primary" : "text-muted-foreground"}`} />
-                  </div>
-                  <div>
-                    <p className={`font-display font-bold text-sm ${isCurrent ? "text-foreground" : "text-muted-foreground"}`}>
-                      {step.label}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{step.desc}</p>
-                    {isCurrent && step.key === "preparing" && (
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <Clock className="w-3 h-3 text-primary" />
-                        <span className="text-xs text-primary font-semibold">Est. 15-20 min</span>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Actions */}
+        {/* Loyalty / next-step nudge */}
         {currentStatus === "delivered" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 space-y-3"
-          >
-            <Link to={sessionId ? `/payment?session=${sessionId}` : "/payment"}>
-              <Button className="w-full gradient-accent text-primary-foreground rounded-2xl py-6 font-semibold glow-accent-sm">
-                <CreditCard className="w-5 h-5 mr-2" /> Pay & Leave Feedback
-              </Button>
-            </Link>
-            <Link to="/menu">
-              <Button variant="outline" className="w-full rounded-2xl py-6 font-semibold border-border">
-                Order More
-              </Button>
-            </Link>
-          </motion.div>
+          <section className="relative bg-gradient-to-br from-primary to-primary-container rounded-2xl p-6 text-primary-foreground overflow-hidden editorial-shadow">
+            <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
+            <div className="relative z-10 flex flex-col gap-4">
+              <div className="w-10 h-10 rounded-full bg-primary-foreground/15 flex items-center justify-center">
+                <span className="material-symbols-outlined">auto_awesome</span>
+              </div>
+              <div>
+                <h3 className="font-display italic text-2xl mb-1">Settle up?</h3>
+                <p className="text-primary-foreground/90 text-sm font-body leading-relaxed max-w-[280px]">
+                  Your meal is complete. Pay and earn loyalty points toward your next visit.
+                </p>
+              </div>
+              <Link
+                to={sessionId ? `/payment?session=${sessionId}` : "/payment"}
+                className="mt-2 w-full py-3 bg-surface-lowest text-primary font-body font-bold rounded-full text-sm uppercase tracking-widest text-center hover:scale-[1.02] transition-transform"
+              >
+                Pay & leave feedback
+              </Link>
+            </div>
+          </section>
         )}
-      </div>
+      </main>
     </div>
   );
 };
