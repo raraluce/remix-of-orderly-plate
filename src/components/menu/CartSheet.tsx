@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { X, Minus, Plus, CreditCard, ChefHat, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import PairingSuggestions from "@/components/menu/PairingSuggestions";
 import CustomiseSheet from "@/components/menu/CustomiseSheet";
@@ -22,24 +20,36 @@ const CartSheet = ({ open, onClose, onCheckout, submitting = false }: Props) => 
 
   if (!open) return null;
 
-  const customiseItem = customiseItemId
-    ? items.find((i) => i.id === customiseItemId) ?? null
-    : null;
+  const customiseItem = customiseItemId ? items.find((i) => i.id === customiseItemId) ?? null : null;
+  const serviceFee = total * 0.05;
+  const grandTotal = total + serviceFee;
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-card border-t border-border rounded-t-3xl animate-slide-up overflow-hidden flex flex-col pb-20">
-        <div className="flex items-center justify-between p-5 border-b border-border">
-          <h2 className="font-display font-bold text-lg">Your Order</h2>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-secondary transition-colors">
-            <X className="w-5 h-5" />
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 max-h-[88vh] bg-surface rounded-t-3xl animate-slide-up overflow-hidden flex flex-col safe-bottom editorial-shadow">
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 pt-6 pb-4">
+          <div>
+            <p className="text-[10px] font-body font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-1">
+              Your selection
+            </p>
+            <h2 className="font-display italic text-3xl text-foreground">Review your table</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-surface-low flex items-center justify-center hover:bg-surface-high transition-colors"
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        {/* Items */}
+        <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-6">
           {items.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">Your cart is empty</p>
+            <p className="text-center text-muted-foreground py-12 font-body italic">
+              Your selection is empty
+            </p>
           ) : (
             items.map((item) => {
               const hasCustomisation = !!dishCustomisations[item.id];
@@ -47,123 +57,117 @@ const CartSheet = ({ open, onClose, onCheckout, submitting = false }: Props) => 
               const unitPrice = item.price + (cust?.priceAdjustment ?? 0);
 
               return (
-                <div key={item.id} className="space-y-2">
-                  <div className="flex gap-3 items-center">
-                    <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-cover" />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm truncate">{item.name}</h4>
-                      <p className="text-sm text-primary font-display font-bold">
-                        €{(unitPrice * item.quantity).toFixed(2)}
-                        {(cust?.priceAdjustment ?? 0) > 0 && (
-                          <span className="text-[11px] text-muted-foreground font-normal ml-1">
-                            (€{item.price.toFixed(2)} + €{cust!.priceAdjustment.toFixed(2)})
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center hover:bg-surface-hover transition-colors"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center hover:bg-surface-hover transition-colors"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
+                <div key={item.id} className="flex items-start gap-4 group">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-surface-high flex-shrink-0">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-start mb-1 gap-3">
+                      <h3 className="font-display text-xl text-foreground leading-tight">{item.name}</h3>
+                      <span className="font-body font-semibold text-sm text-foreground tabular-nums shrink-0">
+                        €{(unitPrice * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
 
-                  {/* Customisation summary & button */}
-                  <div className="pl-[76px] flex flex-col gap-1">
                     {cust && (
-                      <div className="text-[11px] text-muted-foreground space-y-0.5">
+                      <div className="text-[11px] text-muted-foreground space-y-0.5 italic font-body mb-2">
                         {cust.removedIngredients.length > 0 && (
-                          <p>
-                            <span className="text-destructive">−</span>{" "}
-                            {cust.removedIngredients.join(", ")}
-                          </p>
+                          <p><span className="text-destructive not-italic">−</span> no {cust.removedIngredients.join(", ")}</p>
                         )}
                         {cust.addedExtras.length > 0 && (
-                          <p>
-                            <span className="text-primary">+</span>{" "}
-                            {cust.addedExtras.join(", ")}
-                          </p>
+                          <p><span className="text-primary not-italic">+</span> {cust.addedExtras.join(", ")}</p>
                         )}
-                        {cust.cookingPoint && (
-                          <p className="flex items-center gap-1">
-                            <span className="text-amber-500">🔥</span> {cust.cookingPoint}
-                          </p>
-                        )}
+                        {cust.cookingPoint && <p>· {cust.cookingPoint}</p>}
                       </div>
                     )}
-                    {hasCustomisation && (
+
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center bg-surface-low rounded-full px-2 py-1">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-7 h-7 flex items-center justify-center text-primary"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">remove</span>
+                        </button>
+                        <span className="px-2 font-body text-xs font-semibold tabular-nums">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-7 h-7 flex items-center justify-center text-primary"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span>
+                        </button>
+                      </div>
+                      {hasCustomisation && (
+                        <button
+                          onClick={() => setCustomiseItemId(item.id)}
+                          className="text-[10px] uppercase tracking-widest text-primary font-body font-semibold hover:underline underline-offset-4"
+                        >
+                          {cust ? "Edit" : "Customise"}
+                        </button>
+                      )}
                       <button
-                        onClick={() => setCustomiseItemId(item.id)}
-                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors w-fit"
+                        onClick={() => removeItem(item.id)}
+                        className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-body font-medium hover:text-destructive transition-colors ml-auto"
                       >
-                        <ChefHat className="w-3 h-3" />
-                        {cust ? "Edit" : "Customise"}
+                        Remove
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               );
             })
           )}
 
-          {/* Smart pairing suggestions */}
           {items.length > 0 && (
             <PairingSuggestions lastAddedDishId={items[items.length - 1]?.id ?? null} />
           )}
         </div>
 
+        {/* Totals + CTA */}
         {items.length > 0 && (
-          <div className="p-5 border-t border-border space-y-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-semibold">€{total.toFixed(2)}</span>
+          <div className="px-6 pt-4 pb-6 bg-surface border-t border-border/30">
+            <div className="space-y-2 mb-5">
+              <div className="flex justify-between text-sm font-body text-muted-foreground">
+                <span>Subtotal</span>
+                <span className="tabular-nums">€{total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-body text-muted-foreground">
+                <span>Service fee</span>
+                <span className="tabular-nums">€{serviceFee.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-baseline pt-3">
+                <span className="font-display italic text-2xl">Total</span>
+                <span className="font-display text-2xl text-primary tabular-nums">€{grandTotal.toFixed(2)}</span>
+              </div>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Service fee</span>
-              <span className="font-semibold">€{(total * 0.05).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-display font-bold text-lg">
-              <span>Total</span>
-              <span className="text-gradient">€{(total * 1.05).toFixed(2)}</span>
-            </div>
-            <Button
-              className="w-full gradient-accent text-primary-foreground rounded-full py-6 text-base font-semibold glow-accent"
+
+            <button
               onClick={onCheckout}
               disabled={submitting}
+              className="w-full py-4 rounded-full gradient-accent text-primary-foreground font-body font-semibold text-sm uppercase tracking-[0.15em] glow-accent-sm editorial-shadow active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {submitting ? (
-                <><span className="w-5 h-5 mr-2 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin inline-block" /> Placing Order…</>
+                <>
+                  <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Placing order…
+                </>
               ) : isPayLater ? (
-                <><Send className="w-5 h-5 mr-2" /> Send Order to Kitchen</>
+                <>Send to kitchen <span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
               ) : (
-                <><CreditCard className="w-5 h-5 mr-2" /> Continue to Payment</>
+                <>Continue to payment <span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
               )}
-            </Button>
+            </button>
             {isPayLater && (
-              <p className="text-[11px] text-center text-muted-foreground">
-                You'll pay at the end of your meal
+              <p className="text-[10px] text-center text-muted-foreground mt-3 font-body uppercase tracking-widest">
+                Settle the bill at the end of your meal
               </p>
             )}
           </div>
         )}
       </div>
 
-      {/* Customisation overlay */}
       {customiseItem && (
-        <CustomiseSheet
-          item={customiseItem}
-          onClose={() => setCustomiseItemId(null)}
-        />
+        <CustomiseSheet item={customiseItem} onClose={() => setCustomiseItemId(null)} />
       )}
     </div>
   );

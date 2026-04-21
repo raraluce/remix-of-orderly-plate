@@ -1,6 +1,3 @@
-import { Plus, UtensilsCrossed } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import type { DishWithDetails } from "@/hooks/useMenu";
 
@@ -22,61 +19,63 @@ const SupabaseMenuCard = ({ dish }: { dish: DishWithDetails }) => {
     <button
       type="button"
       onClick={handleAdd}
-      className="group w-full text-left bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover-lift focus:outline-none focus:ring-2 focus:ring-primary/40"
+      className="group w-full text-left flex gap-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-2xl"
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
+      {/* Image — soft 16px rounded thumbnail (Stitch list pattern) */}
+      <div className="w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden bg-surface-high">
         {dish.image_url ? (
-          <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img
+            src={dish.image_url}
+            alt={dish.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
         ) : (
-          <div className="w-full h-full bg-muted flex flex-col items-center justify-center gap-2 p-4">
-            <UtensilsCrossed className="w-8 h-8 text-muted-foreground/50" />
-            <span className="text-xs text-muted-foreground/70 font-medium text-center line-clamp-2">{dish.name}</span>
-          </div>
-        )}
-        {dish.is_featured && (
-          <div className="absolute top-3 left-3">
-            <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full gradient-accent text-primary-foreground">
-              Featured
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1 p-2 bg-surface-high">
+            <span className="material-symbols-outlined text-muted-foreground/60 text-[24px]">restaurant</span>
+            <span className="text-[9px] text-muted-foreground/70 font-body text-center line-clamp-2 leading-tight">
+              {dish.name}
             </span>
           </div>
         )}
       </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-display font-semibold text-base leading-tight">{dish.name}</h3>
-          <span className="font-display font-bold text-primary shrink-0">€{Number(dish.price).toFixed(2)}</span>
+
+      {/* Editorial info */}
+      <div className="flex-grow flex flex-col justify-center">
+        <div className="flex justify-between items-start mb-1 gap-3">
+          <h4 className="font-display text-lg leading-snug text-foreground">{dish.name}</h4>
+          <span className="font-body font-semibold text-sm text-primary tabular-nums shrink-0">
+            €{Number(dish.price).toFixed(2)}
+          </span>
         </div>
         {dish.description && (
-          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{dish.description}</p>
-        )}
-        {dietTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {dietTags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-        {allergenNames.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {allergenNames.map((a) => (
-              <Badge key={a} variant="outline" className="text-[10px] px-2 py-0.5 text-muted-foreground border-border">
-                {a}
-              </Badge>
-            ))}
-          </div>
-        )}
-        {dish.prep_time_mins && (
-          <p className="text-[10px] text-muted-foreground mb-2">
-            {dish.prep_time_mins} min{dish.calories ? ` · ${dish.calories} kcal` : ""}
+          <p className="text-muted-foreground text-sm font-body font-light leading-relaxed line-clamp-2 mb-2">
+            {dish.description}
           </p>
         )}
-        <div
-          role="presentation"
-          className="w-full gradient-accent text-primary-foreground rounded-full font-semibold text-xs py-2 flex items-center justify-center pointer-events-none"
-        >
-          <Plus className="w-4 h-4 mr-1" /> Add to Order
+        <div className="flex items-center gap-2 flex-wrap">
+          {dish.is_featured && (
+            <span className="text-[9px] font-body font-bold uppercase tracking-[0.15em] text-primary">
+              · Chef's pick
+            </span>
+          )}
+          {dietTags.slice(0, 2).map((tag) => (
+            <span
+              key={tag}
+              className="text-[9px] font-body font-medium uppercase tracking-wider text-muted-foreground bg-surface-low px-2 py-0.5 rounded"
+            >
+              {tag}
+            </span>
+          ))}
+          {allergenNames.length > 0 && (
+            <span className="text-[9px] font-body font-medium uppercase tracking-wider text-muted-foreground/70">
+              · contains {allergenNames.slice(0, 2).join(", ")}
+            </span>
+          )}
+          {dish.prep_time_mins && (
+            <span className="text-[9px] font-body font-medium uppercase tracking-wider text-muted-foreground/70">
+              · {dish.prep_time_mins}m
+            </span>
+          )}
         </div>
       </div>
     </button>

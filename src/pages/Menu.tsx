@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, MapPin, Star, Clock, Sparkles, User, ShieldCheck, Search, X, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SupabaseMenuCard from "@/components/menu/SupabaseMenuCard";
 import MenuCardSkeleton from "@/components/menu/MenuCardSkeleton";
@@ -17,19 +16,13 @@ import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
 import { useMenuCategories, useMenuDishes, type DishWithDetails } from "@/hooks/useMenu";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import heroFood from "@/assets/hero-food.jpg";
 
-/** Fetch the first active restaurant as a fallback */
 function useDefaultRestaurant(enabled: boolean) {
   return useQuery({
     queryKey: ["default-restaurant"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("status", "active")
-        .limit(1)
-        .single();
+        .from("restaurants").select("*").eq("status", "active").limit(1).single();
       if (error) throw error;
       return data;
     },
@@ -37,16 +30,11 @@ function useDefaultRestaurant(enabled: boolean) {
   });
 }
 
-/** Fetch a specific restaurant by id (used when arriving from QR join) */
 function useRestaurantById(id: string | null) {
   return useQuery({
     queryKey: ["restaurant", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("restaurants")
-        .select("*")
-        .eq("id", id!)
-        .single();
+      const { data, error } = await supabase.from("restaurants").select("*").eq("id", id!).single();
       if (error) throw error;
       return data;
     },
@@ -59,26 +47,22 @@ const Menu = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [personalizedMode, setPersonalizedMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { items, clearCart } = useCart();
   const { allergenKeys, allergens } = useUserPreferences();
   const { session, tableNumber } = useTableSession();
-  const { config } = useRestaurantConfig();
 
   const sessionId = searchParams.get("session");
   const urlRestaurantId = searchParams.get("restaurant");
 
-  // Prefer the restaurant id from the QR join URL; fall back to the first active one
   const { data: byId, isLoading: byIdLoading } = useRestaurantById(urlRestaurantId);
   const { data: fallback, isLoading: fallbackLoading } = useDefaultRestaurant(!urlRestaurantId);
   const restaurant = byId ?? fallback;
   const restLoading = urlRestaurantId ? byIdLoading : fallbackLoading;
   const restaurantId = restaurant?.id;
 
-  // Fetch categories & dishes from Supabase
   const { data: categories = [], isLoading: catsLoading } = useMenuCategories(restaurantId);
   const { data: dishes = [], isLoading: dishesLoading } = useMenuDishes(restaurantId);
 
@@ -89,7 +73,6 @@ const Menu = () => {
     return !dishAllergenNames.some((name) => allergenKeys.some((k) => k === name));
   };
 
-  // Search filter
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return null;
     const q = searchQuery.toLowerCase();
@@ -101,7 +84,6 @@ const Menu = () => {
     );
   }, [dishes, searchQuery]);
 
-  // Category filter
   const baseFiltered = useMemo(() => {
     if (searchFiltered) return searchFiltered;
     if (category === "all") return dishes;
@@ -109,6 +91,17 @@ const Menu = () => {
   }, [searchFiltered, category, dishes]);
 
   const filtered = personalizedMode ? baseFiltered.filter(isCompatible) : baseFiltered;
+
+  // Group by category for editorial sections
+  const groupedByCategory = useMemo(() => {
+    if (searchFiltered || category !== "all") return null;
+    return categories
+      .map((cat) => ({
+        ...cat,
+        dishes: filtered.filter((d) => d.category_id === cat.id),
+      }))
+      .filter((c) => c.dishes.length > 0);
+  }, [categories, filtered, searchFiltered, category]);
 
   const handleCheckout = useCallback(async () => {
     if (!sessionId || !urlRestaurantId) {
@@ -120,8 +113,6 @@ const Menu = () => {
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-
-      // 1. Create the order
       const { data: order, error: orderErr } = await supabase
         .from("orders")
         .insert({
@@ -133,10 +124,8 @@ const Menu = () => {
         })
         .select("id")
         .single();
-
       if (orderErr || !order) throw orderErr ?? new Error("Failed to create order");
 
-      // 2. Create order items
       const orderItems = items.map((item) => ({
         order_id: order.id,
         session_id: sessionId,
@@ -144,11 +133,9 @@ const Menu = () => {
         quantity: item.quantity,
         unit_price: item.price,
       }));
-
       const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
       if (itemsErr) throw itemsErr;
 
-      // 3. Navigate to confirmation with order details
       setCartOpen(false);
       const orderTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
       navigate("/order-confirmation", {
@@ -171,124 +158,85 @@ const Menu = () => {
 
   const handleSearch = (q: string) => {
     setSearchQuery(q);
-    if (q.trim()) {
-      analyticsService.track("search_performed", { query: q });
-    }
+    if (q.trim()) analyticsService.track("search_performed", { query: q });
   };
-
-  // Featured recommendations
-  const recommended = useMemo(
-    () =>
-      dishes
-        .filter((d) => d.is_featured)
-        .filter((d) => !personalizedMode || isCompatible(d))
-        .slice(0, 3),
-    [dishes, personalizedMode, allergenKeys]
-  );
 
   const categoryItems = categories.map((c) => ({ id: c.id, name: c.name }));
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Restaurant Header */}
-      <div className="relative h-48 overflow-hidden">
-        <img src={restaurant?.cover_url || heroFood} alt="Restaurant" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        <Link to={session ? "/table" : "/"} className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass flex items-center justify-center">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
-          <button
-            onClick={() => setShowSearch(!showSearch)}
-            className="w-10 h-10 rounded-full glass flex items-center justify-center"
+    <div className="min-h-screen bg-background pb-32 paper-grain">
+      {/* Editorial top app bar — glass */}
+      <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
+        <div className="flex justify-between items-center w-full px-6 h-16">
+          <Link
+            to={session ? "/table" : "/"}
+            className="text-primary hover:opacity-80 transition-opacity active:scale-95"
           >
-            <Search className="w-5 h-5" />
-          </button>
-          <Link to="/profile" className="w-10 h-10 rounded-full glass flex items-center justify-center">
-            <User className="w-5 h-5" />
+            <span className="material-symbols-outlined">arrow_back</span>
+          </Link>
+          <h1 className="font-display italic font-bold text-primary text-2xl tracking-tight">bite.</h1>
+          <Link to="/profile" className="text-primary hover:opacity-80 transition-opacity active:scale-95">
+            <span className="material-symbols-outlined">account_circle</span>
           </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="container mx-auto px-4 -mt-12 relative z-10">
-        <div className="mb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-display font-bold mb-1">{restaurant?.name ?? "Menu"}</h1>
-              {session && (
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Users className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs text-primary font-semibold">Table {tableNumber} · {session.users.length} guest{session.users.length > 1 ? "s" : ""}</span>
-                </div>
-              )}
-            </div>
-            <Link to="/smart-menu" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full gradient-accent text-primary-foreground text-xs font-bold shadow-lg animate-pulse hover:animate-none transition-all">
-              <Sparkles className="w-3.5 h-3.5" />
-              Smart Menu
-            </Link>
-          </div>
-          {restaurant && (
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              {restaurant.address && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {restaurant.address}</span>}
-              {restaurant.phone && <span className="flex items-center gap-1">{restaurant.phone}</span>}
-            </div>
+      <main className="pt-24 px-6 max-w-2xl mx-auto">
+        {/* Restaurant masthead */}
+        <section className="mb-10">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-body font-semibold mb-3">
+            {session && tableNumber ? `Table ${tableNumber} · ` : ""}
+            {session ? `${session.users.length} guest${session.users.length > 1 ? "s" : ""}` : "Spring Menu"}
+          </p>
+          <h2 className="font-display text-5xl text-foreground leading-[1.05]">
+            {restaurant?.name ?? "Seasonal"}
+            <br />
+            <span className="italic text-primary">Curations</span>
+          </h2>
+          {restaurant?.description && (
+            <p className="text-sm text-muted-foreground font-body font-light leading-relaxed mt-4 max-w-md">
+              {restaurant.description}
+            </p>
           )}
+        </section>
+
+        {/* Search — bottom-only ghost border */}
+        <div className="relative mb-8">
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+            search
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Search the menu..."
+            className="w-full bg-surface-low border-none rounded-2xl py-4 pl-12 pr-4 font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary-fixed-dim placeholder:text-muted-foreground/50 transition-all"
+          />
         </div>
 
-        {/* Search Bar */}
-        <AnimatePresence>
-          {showSearch && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden mb-4"
-            >
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Search dishes, ingredients…"
-                  className="w-full bg-card border border-border rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                  autoFocus
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <X className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Personalized toggle */}
-        <div className="flex items-center justify-between mb-4 bg-card border border-border rounded-xl px-4 py-3">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-primary" />
+        {/* Personalised toggle */}
+        <div className="flex items-center justify-between mb-6 bg-surface-low rounded-2xl px-5 py-4">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary text-[22px]">verified</span>
             <div>
-              <p className="text-sm font-semibold">Safe for me</p>
-              <p className="text-[11px] text-muted-foreground">Hide dishes with your allergens</p>
+              <p className="text-sm font-body font-semibold">Safe for me</p>
+              <p className="text-[11px] text-muted-foreground font-body font-light">Hide dishes with your allergens</p>
             </div>
           </div>
           <Switch checked={personalizedMode} onCheckedChange={setPersonalizedMode} />
         </div>
 
         <AnimatePresence>
-          {personalizedMode && (
+          {personalizedMode && allergens.length > 0 && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden mb-4"
+              className="overflow-hidden mb-6"
             >
               <div className="flex flex-wrap gap-1.5">
                 {allergens.map((a) => (
-                  <span key={a} className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+                  <span key={a} className="px-3 py-1 text-[10px] font-body font-semibold uppercase tracking-wider rounded-full bg-destructive/10 text-destructive">
                     No {a}
                   </span>
                 ))}
@@ -297,70 +245,60 @@ const Menu = () => {
           )}
         </AnimatePresence>
 
+        {/* Category chips */}
         {!searchQuery && (
-          <div className="mb-6 sticky top-0 z-20 bg-background py-3">
+          <div className="mb-10 sticky top-16 z-30 bg-background/90 backdrop-blur-md py-3 -mx-6 px-6">
             <CategoryNav active={category} onChange={setCategory} categories={categoryItems} />
           </div>
         )}
 
         {searchQuery && (
-          <p className="text-xs text-muted-foreground mb-4">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-body font-semibold mb-6">
             {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{searchQuery}"
           </p>
         )}
 
-        {/* Featured recommendations */}
-        {!searchQuery && category === "all" && recommended.length > 0 && !isLoading && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <h2 className="font-display font-semibold text-sm">Recommended for You</h2>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-              {recommended.map((dish) => (
-                <div key={`rec-${dish.id}`} className="w-[200px] flex-shrink-0 bg-card border border-primary/20 rounded-2xl overflow-hidden hover-lift">
-                  <div className="h-28 w-full overflow-hidden">
-                    {dish.image_url ? (
-                      <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-muted" />
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h4 className="font-semibold text-xs truncate">{dish.name}</h4>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-primary font-display font-bold text-xs">€{Number(dish.price).toFixed(2)}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full gradient-accent text-primary-foreground font-bold uppercase">
-                        Featured
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Loading skeletons */}
+        {/* Loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="space-y-6">
+            {Array.from({ length: 4 }).map((_, i) => (
               <MenuCardSkeleton key={i} />
             ))}
           </div>
         )}
 
-        {/* Menu items */}
-        {!isLoading && (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Editorial grouped sections */}
+        {!isLoading && groupedByCategory && groupedByCategory.length > 0 && (
+          <>
+            {groupedByCategory.map((cat, idx) => (
+              <section key={cat.id} className="mb-12">
+                <div className="flex justify-between items-end mb-6">
+                  <h3 className="font-display italic text-3xl text-foreground">{cat.name}</h3>
+                  <span className="font-body text-[10px] tracking-[0.2em] uppercase text-muted-foreground/70">
+                    {String(idx * 10 + 1).padStart(2, "0")} — {String(idx * 10 + cat.dishes.length).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="space-y-6">
+                  {cat.dishes.map((dish) => (
+                    <SupabaseMenuCard key={dish.id} dish={dish} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </>
+        )}
+
+        {/* Filtered (search/category) */}
+        {!isLoading && (!groupedByCategory || groupedByCategory.length === 0) && filtered.length > 0 && (
+          <motion.div layout className="space-y-6">
             <AnimatePresence mode="popLayout">
               {filtered.map((dish) => (
                 <motion.div
                   key={dish.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25 }}
                 >
                   <SupabaseMenuCard dish={dish} />
@@ -370,19 +308,19 @@ const Menu = () => {
           </motion.div>
         )}
 
-        {/* Empty state */}
+        {/* Empty */}
         {!isLoading && filtered.length === 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-            <p className="text-muted-foreground text-sm">
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-sm font-body italic">
               {searchQuery
                 ? `No dishes found for "${searchQuery}"`
                 : dishes.length === 0
-                ? "No dishes available yet. Check back soon!"
+                ? "No dishes available yet. Check back soon."
                 : "No dishes match your filters in this category."}
             </p>
-          </motion.div>
+          </div>
         )}
-      </div>
+      </main>
 
       <FloatingCart onClick={() => setCartOpen(true)} />
       <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} onCheckout={handleCheckout} submitting={submitting} />
