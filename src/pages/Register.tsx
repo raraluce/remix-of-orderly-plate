@@ -16,8 +16,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { useAppUser } from "@/contexts/AppUserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { useToast } from "@/hooks/use-toast";
 
 const ALLERGENS = ["Gluten", "Crustaceans", "Eggs", "Fish", "Peanuts", "Soy", "Dairy", "Tree Nuts", "Celery", "Mustard", "Sesame", "Sulphites", "Molluscs", "Lupin"];
 const DIETARY = ["Vegetarian", "Vegan", "Pescatarian", "Halal", "Kosher", "Keto", "Paleo"];
@@ -32,8 +33,10 @@ const TOTAL_STEPS = 5;
 
 const Register = () => {
   const navigate = useNavigate();
-  const { setAppUser } = useAppUser();
+  const { signUp } = useAuth();
+  const { toast } = useToast();
   const { allergens, dietary, toggleAllergen, toggleDietary } = useUserPreferences();
+  const [finishing, setFinishing] = useState(false);
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
@@ -53,9 +56,25 @@ const Register = () => {
     setStep((s) => Math.max(s - 1, 0));
   };
 
-  const finish = () => {
-    setAppUser(true);
-    navigate("/explore");
+  const finish = async () => {
+    if (step === TOTAL_STEPS - 1) {
+      setFinishing(true);
+      try {
+        await signUp(email, password, name);
+        toast({ title: "Account created!", description: "Welcome to .bite" });
+        navigate("/explore");
+      } catch (err: unknown) {
+        toast({
+          title: "Registration failed",
+          description: err instanceof Error ? err.message : "Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setFinishing(false);
+      }
+    } else {
+      navigate("/explore");
+    }
   };
 
   const canAdvance = () => {

@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { useAppUser } from "@/contexts/AppUserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/app/BottomNav";
@@ -447,21 +447,21 @@ const LanguageSection = () => {
 /* ── Main Component ── */
 const ProfileSettings = () => {
   const navigate = useNavigate();
-  const { isAppUser, setAppUser } = useAppUser();
+  const { isAuthenticated, signOut } = useAuth();
   const { settings, resetSettings } = useSettings();
   const { toast } = useToast();
 
   const [section, setSection] = useState<SettingsSection>(null);
 
-  const handleLogout = () => {
-    setAppUser(false);
+  const handleLogout = async () => {
+    await signOut();
     toast({ title: "Signed out" });
     navigate("/");
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     resetSettings();
-    setAppUser(false);
+    await signOut();
     toast({ title: "Account deleted", description: "All your data has been removed." });
     navigate("/");
   };
@@ -489,7 +489,7 @@ const ProfileSettings = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-background ${isAppUser ? "pb-24" : "pb-12"}`}>
+    <div className={`min-h-screen bg-background ${isAuthenticated ? "pb-24" : "pb-12"}`}>
       {/* Header */}
       <header className="border-b border-border glass sticky top-0 z-50">
         <div className="container mx-auto px-4 h-14 flex items-center gap-4">
@@ -589,7 +589,7 @@ const ProfileSettings = () => {
         </motion.div>
       </div>
 
-      {isAppUser && <BottomNav />}
+      {isAuthenticated && <BottomNav />}
     </div>
   );
 };

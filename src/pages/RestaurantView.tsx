@@ -10,12 +10,12 @@ import FloatingCart from "@/components/menu/FloatingCart";
 import CartSheet from "@/components/menu/CartSheet";
 import ReservationSheet from "@/components/app/ReservationSheet";
 import BottomNav from "@/components/app/BottomNav";
-import { useAppUser } from "@/contexts/AppUserContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const RestaurantView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAppUser } = useAppUser();
+  const { isAuthenticated } = useAuth();
   const restaurant = restaurants.find((r) => r.id === id);
   const [category, setCategory] = useState("popular");
   const [cartOpen, setCartOpen] = useState(false);
@@ -36,7 +36,7 @@ const RestaurantView = () => {
       : menuItems.filter((i) => i.category === category);
 
   return (
-    <div className={`min-h-screen bg-background ${isAppUser ? "pb-24" : "pb-20"}`}>
+    <div className={`min-h-screen bg-background ${isAuthenticated ? "pb-24" : "pb-20"}`}>
       {/* Hero */}
       <div className="relative h-56 overflow-hidden">
         <img src={restaurant.coverImage} alt={restaurant.name} className="w-full h-full object-cover" />
@@ -122,7 +122,7 @@ const RestaurantView = () => {
         onClose={() => setReserveOpen(false)}
         restaurant={restaurant}
       />
-      {isAppUser && <BottomNav />}
+      {isAuthenticated && <BottomNav />}
     </div>
   );
 };

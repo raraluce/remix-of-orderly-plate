@@ -1,15 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { CartProvider } from "@/contexts/CartContext";
-import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
-import { TableSessionProvider } from "@/contexts/TableSessionContext";
-import { AppUserProvider } from "@/contexts/AppUserContext";
-import { SettingsProvider } from "@/contexts/SettingsContext";
-import { RestaurantConfigProvider } from "@/contexts/RestaurantConfigContext";
+import { Routes, Route } from "react-router-dom";
+import AppProviders from "@/providers/AppProviders";
 import Index from "./pages/Index";
 import Menu from "./pages/Menu";
 import QREntry from "./pages/QREntry";
@@ -32,84 +24,65 @@ import ProfileSettings from "./pages/ProfileSettings";
 import RestaurantLayout from "./pages/restaurant/RestaurantLayout";
 import DashboardHome from "./pages/restaurant/DashboardHome";
 import OrdersManagement from "./pages/restaurant/OrdersManagement";
-import MenuManagement from "./pages/MenuManagement";
+import MenuManagement from "./pages/restaurant/MenuManagement";
 import TablesQR from "./pages/restaurant/TablesQR";
 import PaymentsView from "./pages/restaurant/PaymentsView";
 import AnalyticsDashboard from "./pages/restaurant/AnalyticsDashboard";
 import RestaurantSettings from "./pages/restaurant/RestaurantSettings";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
-
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-        <AppUserProvider>
-          <RestaurantConfigProvider>
-          <SettingsProvider>
-            <UserPreferencesProvider>
-              <TableSessionProvider>
-                <CartProvider>
-                  <Toaster />
-                  <Sonner />
-                  <Routes>
-                    {/* Landing */}
-                    <Route path="/" element={<Index />} />
+  <AppProviders>
+    <Toaster />
+    <Sonner />
+    <Routes>
+      {/* Landing */}
+      <Route path="/" element={<Index />} />
 
-                    {/* Registration */}
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
+      {/* Registration */}
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                    {/* App User Flow (registered/downloaded app) */}
-                    <Route path="/explore" element={<Explore />} />
-                    <Route path="/smart-explore" element={<SmartExplore />} />
-                    <Route path="/map" element={<MapView />} />
-                    <Route path="/restaurant-view/:id" element={<RestaurantView />} />
+      {/* App User Flow (registered/downloaded app) */}
+      <Route path="/explore" element={<Explore />} />
+      <Route path="/smart-explore" element={<SmartExplore />} />
+      <Route path="/map" element={<MapView />} />
+      <Route path="/restaurant-view/:id" element={<RestaurantView />} />
 
-                    {/* Customer Flow (QR-only or app) */}
-                    <Route path="/qr" element={<QREntry />} />
-                    <Route path="/join/:restaurantSlug/:tableId" element={<JoinTable />} />
-                    <Route path="/menu" element={<Menu />} />
-                    <Route path="/smart-menu" element={<SmartMenu />} />
-                    <Route path="/table" element={<TableView />} />
-                    <Route path="/order-status" element={<OrderStatus />} />
-                    <Route path="/payment" element={<Payment />} />
-                    <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                    <Route path="/feedback" element={<Feedback />} />
-                    <Route path="/profile" element={<DinerProfile />} />
-                    <Route path="/settings" element={<ProfileSettings />} />
+      {/* Customer Flow (QR-only or app) */}
+      <Route path="/qr" element={<QREntry />} />
+      <Route path="/join/:restaurantSlug/:tableId" element={<JoinTable />} />
+      <Route path="/menu" element={<Menu />} />
+      <Route path="/smart-menu" element={<SmartMenu />} />
+      <Route path="/table" element={<TableView />} />
+      <Route path="/order-status" element={<OrderStatus />} />
+      <Route path="/payment" element={<Payment />} />
+      <Route path="/order-confirmation" element={<OrderConfirmation />} />
+      <Route path="/feedback" element={<Feedback />} />
+      <Route path="/profile" element={<DinerProfile />} />
+      <Route path="/settings" element={<ProfileSettings />} />
 
-                    {/* Restaurant Dashboard */}
-                    <Route path="/restaurant" element={<RestaurantLayout />}>
-                      <Route index element={<DashboardHome />} />
-                      <Route path="orders" element={<OrdersManagement />} />
-                      <Route path="menu" element={<MenuManagement />} />
-                      <Route path="tables" element={<TablesQR />} />
-                      <Route path="payments" element={<PaymentsView />} />
-                      <Route path="analytics" element={<AnalyticsDashboard />} />
-                      <Route path="settings" element={<RestaurantSettings />} />
-                    </Route>
+      {/* Restaurant Dashboard */}
+      <Route path="/restaurant" element={<RestaurantLayout />}>
+        <Route index element={<DashboardHome />} />
+        <Route path="orders" element={<OrdersManagement />} />
+        <Route path="menu" element={<MenuManagement />} />
+        <Route path="tables" element={<TablesQR />} />
+        <Route path="payments" element={<PaymentsView />} />
+        <Route path="analytics" element={<AnalyticsDashboard />} />
+        <Route path="settings" element={<RestaurantSettings />} />
+      </Route>
 
-                    {/* Legacy redirect */}
-                    <Route path="/dashboard" element={<RestaurantLayout />}>
-                      <Route index element={<DashboardHome />} />
-                    </Route>
+      {/* Legacy redirect */}
+      <Route path="/dashboard" element={<RestaurantLayout />}>
+        <Route index element={<DashboardHome />} />
+      </Route>
 
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </CartProvider>
-              </TableSessionProvider>
-            </UserPreferencesProvider>
-          </SettingsProvider>
-          </RestaurantConfigProvider>
-        </AppUserProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </AppProviders>
 );
 
 export default App;
+

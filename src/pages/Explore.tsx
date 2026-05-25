@@ -1,20 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Star, Clock, MapPin, ChevronRight, Bookmark, Tag, Sparkles } from "lucide-react";
 import { restaurants, newsItems, offerBanners, type RestaurantListing } from "@/data/restaurants";
 import ReservationSheet from "@/components/app/ReservationSheet";
 import BottomNav from "@/components/app/BottomNav";
-import { useAppUser } from "@/contexts/AppUserContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Explore = () => {
   const navigate = useNavigate();
-  const { setAppUser } = useAppUser();
+  const { profile, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [reserveTarget, setReserveTarget] = useState<RestaurantListing | null>(null);
 
-  // Mark as app user when they access the Explore page
-  useEffect(() => { setAppUser(true); }, [setAppUser]);
+  const displayName = profile?.display_name ?? user?.email?.split("@")[0] ?? "there";
+  const firstName = displayName.split(" ")[0];
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const filteredRestaurants = searchQuery.trim()
     ? restaurants.filter(
@@ -30,7 +36,7 @@ const Explore = () => {
       <div className="px-4 pt-12 pb-4">
         <div className="flex items-center justify-between mb-1">
           <div>
-            <p className="text-sm text-muted-foreground">Good evening 👋</p>
+            <p className="text-sm text-muted-foreground">Good evening {firstName} 👋</p>
             <h1 className="text-2xl font-display font-bold">
               Discover with <span className="text-gradient">.bite</span>
             </h1>
@@ -39,7 +45,7 @@ const Explore = () => {
             onClick={() => navigate("/profile")}
             className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center text-primary-foreground text-xs font-bold"
           >
-            JD
+            {initials}
           </button>
         </div>
       </div>

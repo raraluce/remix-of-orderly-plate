@@ -1,3 +1,9 @@
+// NOTE: This static dataset is intentionally used by the Explore/discovery UI
+// because it contains rich UI-specific metadata (images, vibes, occasions,
+// cuisineTypes, etc.) that is not yet stored in the Supabase `restaurants`
+// table. Once the Supabase schema is extended with these fields, this file
+// should be removed and Explore.tsx should fetch from Supabase via
+// menuService / a new useRestaurants hook.
 import heroFood from "@/assets/hero-food.jpg";
 import foodPasta from "@/assets/food-pasta.jpg";
 import foodSushi from "@/assets/food-sushi.jpg";

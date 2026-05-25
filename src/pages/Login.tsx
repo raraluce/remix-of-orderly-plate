@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAppUser } from "@/contexts/AppUserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setAppUser } = useAppUser();
+  const { signIn } = useAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -19,22 +19,25 @@ const Login = () => {
 
   const canSubmit = email.includes("@") && password.length >= 6;
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setAppUser(true);
+    try {
+      await signIn(email, password);
       toast({ title: "Welcome back!", description: "You're now signed in." });
       navigate("/explore");
-    }, 800);
+    } catch (err: unknown) {
+      toast({
+        title: "Sign in failed",
+        description: err instanceof Error ? err.message : "Please check your credentials.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocial = (provider: string) => {
-    setLoading(true);
-    setTimeout(() => {
-      setAppUser(true);
-      toast({ title: `Signed in with ${provider}` });
-      navigate("/explore");
-    }, 800);
+    toast({ title: `${provider} sign-in coming soon` });
   };
 
   return (

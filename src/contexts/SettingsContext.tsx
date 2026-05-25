@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ── Types ── */
 export interface PaymentMethod {
@@ -81,6 +82,31 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<UserSettings>(loadSettings);
 
+  // Sync name/email from Supabase profile when auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session?.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", session.user.id)
+        .single();
+      if (profile) {
+        setSettings((prev) => ({
+          ...prev,
+          name: profile.display_name ?? prev.name,
+          email: session.user.email ?? prev.email,
+        }));
+      } else {
+        setSettings((prev) => ({
+          ...prev,
+          email: session.user.email ?? prev.email,
+        }));
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Persist to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
@@ -96,8 +122,18 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [settings.darkMode]);
 
-  const updateSettings = useCallback((patch: Partial<UserSettings>) => {
+  const updateSettings = useCallback(async (patch: Partial<UserSettings>) => {
     setSettings((prev) => ({ ...prev, ...patch }));
+    // Persist profile fields (name) to Supabase if user is logged in
+    if (patch.name !== undefined) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ display_name: patch.name })
+          .eq("id", user.id);
+      }
+    }
   }, []);
 
   const resetSettings = useCallback(() => {

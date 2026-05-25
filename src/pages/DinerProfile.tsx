@@ -2,73 +2,46 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Heart, DollarSign, AlertTriangle, Leaf, Star,
-  TrendingUp, Utensils, CalendarDays, Clock, MapPin, Settings, ChevronRight,
+  TrendingUp, Utensils, CalendarDays, Clock, MapPin, Settings, ChevronRight, LogOut,
 } from "lucide-react";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
-import { useAppUser } from "@/contexts/AppUserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import BottomNav from "@/components/app/BottomNav";
-import foodPasta from "@/assets/food-pasta.jpg";
-import foodSushi from "@/assets/food-sushi.jpg";
-import foodPizza from "@/assets/food-pizza.jpg";
-import foodDessert from "@/assets/food-dessert.jpg";
 
 const allergenOptions = ["Gluten", "Crustaceans", "Eggs", "Fish", "Peanuts", "Soy", "Dairy", "Tree Nuts", "Celery", "Mustard", "Sesame", "Sulphites", "Molluscs", "Lupin"];
 const dietaryOptions = ["Vegetarian", "Vegan", "Keto", "Halal", "Kosher", "Pescatarian", "Paleo"];
 
-const favorites = [
-  { id: "1", name: "Truffle Spaghetti", restaurant: "The Grand Kitchen", price: 24, image: foodPasta, rating: 4.9 },
-  { id: "2", name: "Dragon Roll Platter", restaurant: "Sakura Omakase", price: 22, image: foodSushi, rating: 4.8 },
-  { id: "3", name: "Margherita DOP", restaurant: "The Grand Kitchen", price: 16, image: foodPizza, rating: 4.7 },
-  { id: "4", name: "Molten Lava Cake", restaurant: "The Grand Kitchen", price: 14, image: foodDessert, rating: 5.0 },
-];
-
-const orderHistory = [
-  { id: "#2041", date: "Today", restaurant: "The Grand Kitchen", items: 3, total: 62.0, status: "Delivered" },
-  { id: "#2038", date: "Yesterday", restaurant: "Sakura Omakase", items: 2, total: 38.5, status: "Delivered" },
-  { id: "#2035", date: "Mar 5", restaurant: "The Grand Kitchen", items: 4, total: 87.0, status: "Delivered" },
-  { id: "#2031", date: "Mar 2", restaurant: "Sakura Omakase", items: 5, total: 124.0, status: "Delivered" },
-];
-
-const savedReservations = [
-  {
-    id: "res-1",
-    restaurant: "The Grand Kitchen",
-    date: "Mar 12, 2026",
-    time: "20:00",
-    guests: 4,
-    status: "upcoming" as const,
-    image: foodPasta,
-  },
-  {
-    id: "res-2",
-    restaurant: "Sakura Omakase",
-    date: "Mar 15, 2026",
-    time: "19:30",
-    guests: 2,
-    status: "upcoming" as const,
-    image: foodSushi,
-  },
-  {
-    id: "res-3",
-    restaurant: "The Grand Kitchen",
-    date: "Feb 28, 2026",
-    time: "21:00",
-    guests: 3,
-    status: "past" as const,
-    image: foodPizza,
-  },
-];
+const favorites: { id: string; name: string; restaurant: string; price: number; image: string; rating: number }[] = [];
+const orderHistory: { id: string; date: string; restaurant: string; items: number; total: number; status: string }[] = [];
+const savedReservations: { id: string; restaurant: string; date: string; time: string; guests: number; status: "upcoming" | "past"; image: string }[] = [];
 
 const DinerProfile = () => {
   const navigate = useNavigate();
   const { allergens: selectedAllergens, dietary: selectedDietary, toggleAllergen, toggleDietary } = useUserPreferences();
-  const { isAppUser } = useAppUser();
+  const { isAuthenticated, profile, user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch {
+      // ignore
+    }
+    navigate("/");
+  };
+
+  const displayName = profile?.display_name ?? user?.email?.split("@")[0] ?? "Guest";
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const upcomingReservations = savedReservations.filter((r) => r.status === "upcoming");
   const pastReservations = savedReservations.filter((r) => r.status === "past");
 
   return (
-    <div className={`min-h-screen bg-background ${isAppUser ? "pb-24" : "pb-12"}`}>
+    <div className={`min-h-screen bg-background ${isAuthenticated ? "pb-24" : "pb-12"}`}>
       {/* Header */}
       <header className="border-b border-border glass sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -81,9 +54,14 @@ const DinerProfile = () => {
               <p className="text-xs text-muted-foreground">Preferences & history</p>
             </div>
           </div>
-          <button onClick={() => navigate("/settings")} className="p-2 rounded-full hover:bg-secondary transition-colors">
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => navigate("/settings")} className="p-2 rounded-full hover:bg-secondary transition-colors">
+              <Settings className="w-5 h-5 text-muted-foreground" />
+            </button>
+            <button onClick={handleSignOut} className="p-2 rounded-full hover:bg-secondary transition-colors" title="Sign out">
+              <LogOut className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -95,11 +73,11 @@ const DinerProfile = () => {
           className="flex items-center gap-5"
         >
           <div className="w-20 h-20 rounded-full gradient-accent flex items-center justify-center text-2xl font-display font-bold text-primary-foreground glow-accent">
-            JD
+            {initials}
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-display font-bold">Jamie Doe</h2>
-            <p className="text-sm text-muted-foreground">Foodie since 2024</p>
+            <h2 className="text-xl font-display font-bold">{displayName}</h2>
+            <p className="text-sm text-muted-foreground">Foodie since {user?.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear()}</p>
           </div>
         </motion.div>
 
@@ -112,17 +90,17 @@ const DinerProfile = () => {
         >
           <div className="bg-card border border-border rounded-2xl p-4 text-center">
             <DollarSign className="w-5 h-5 mx-auto mb-2 text-primary" />
-            <p className="font-display font-bold text-lg">$42</p>
+            <p className="font-display font-bold text-lg">—</p>
             <p className="text-[11px] text-muted-foreground">Avg Ticket</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 text-center">
             <TrendingUp className="w-5 h-5 mx-auto mb-2 text-primary" />
-            <p className="font-display font-bold text-lg">23</p>
+            <p className="font-display font-bold text-lg">0</p>
             <p className="text-[11px] text-muted-foreground">Total Orders</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 text-center">
             <Utensils className="w-5 h-5 mx-auto mb-2 text-primary" />
-            <p className="font-display font-bold text-lg">$965</p>
+            <p className="font-display font-bold text-lg">$0</p>
             <p className="text-[11px] text-muted-foreground">Total Spent</p>
           </div>
         </motion.div>
@@ -337,7 +315,7 @@ const DinerProfile = () => {
         </motion.div>
       </div>
 
-      {isAppUser && <BottomNav />}
+      {isAuthenticated && <BottomNav />}
     </div>
   );
 };

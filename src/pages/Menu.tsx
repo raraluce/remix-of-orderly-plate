@@ -13,34 +13,7 @@ import { useTableSession } from "@/contexts/TableSessionContext";
 import { Switch } from "@/components/ui/switch";
 import { analyticsService } from "@/services/analyticsService";
 import { useRestaurantConfig } from "@/contexts/RestaurantConfigContext";
-import { useMenuCategories, useMenuDishes, type DishWithDetails } from "@/hooks/useMenu";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-
-function useDefaultRestaurant(enabled: boolean) {
-  return useQuery({
-    queryKey: ["default-restaurant"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("restaurants").select("*").eq("status", "active").limit(1).single();
-      if (error) throw error;
-      return data;
-    },
-    enabled,
-  });
-}
-
-function useRestaurantById(id: string | null) {
-  return useQuery({
-    queryKey: ["restaurant", id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("restaurants").select("*").eq("id", id!).single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!id,
-  });
-}
+import { useMenuCategories, useMenuDishes, useDefaultRestaurant, useRestaurantById, type DishWithDetails } from "@/hooks/useMenu";
 
 const Menu = () => {
   const [category, setCategory] = useState("all");
